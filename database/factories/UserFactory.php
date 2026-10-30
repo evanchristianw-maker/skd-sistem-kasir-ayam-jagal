@@ -8,38 +8,47 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
+ * Factory untuk membuat data pengguna.
+ *
  * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
     /**
-     * The current password being used by the factory.
+     * Menyimpan password default agar tidak di-hash berulang kali.
      */
     protected static ?string $password;
 
     /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
+     * Menentukan struktur data pengguna.
      */
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
-            'email_verified_at' => now(),
+            // Membuat username unik
+            'username' => fake()->unique()->userName(),
+
+            // Membuat nama lengkap pengguna
+            'nama_lengkap' => fake()->name(),
+
+            // Password default untuk pengujian
             'password' => static::$password ??= Hash::make('password'),
+
+            // Menentukan role default sebagai kasir
+            'role' => 'kasir',
+
+            // Membuat token untuk fitur remember me
             'remember_token' => Str::random(10),
         ];
     }
 
     /**
-     * Indicate that the model's email address should be unverified.
+     * Mengatur role pengguna menjadi admin.
      */
-    public function unverified(): static
+    public function admin(): static
     {
         return $this->state(fn (array $attributes) => [
-            'email_verified_at' => null,
+            'role' => 'admin',
         ]);
     }
 }

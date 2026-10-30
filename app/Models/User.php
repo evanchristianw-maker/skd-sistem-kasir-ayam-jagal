@@ -2,30 +2,52 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+// Mengimpor factory untuk pembuatan data pengguna
 use Database\Factories\UserFactory;
+
+// Mengimpor atribut untuk mengatur kolom yang dapat diisi
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+
+// Mengimpor atribut untuk menyembunyikan data sensitif
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+
+// Mengimpor fitur factory dan autentikasi Laravel
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password'])]
-#[Hidden(['password', 'remember_token'])]
+#[Fillable([
+    'username',
+    'nama_lengkap',
+    'password',
+    'role',
+])]
+
+#[Hidden([
+    'password',
+    'remember_token',
+])]
+
 class User extends Authenticatable
 {
-    /** @use HasFactory<UserFactory> */
+    // Mengaktifkan factory dan notifikasi Laravel
     use HasFactory, Notifiable;
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Mengatur factory yang digunakan untuk model User.
+     */
+    protected static function newFactory(): UserFactory
+    {
+        return UserFactory::new();
+    }
+
+    /**
+     * Mengatur tipe data kolom tertentu.
      */
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
+            // Password akan disimpan dalam bentuk hash
             'password' => 'hashed',
         ];
     }
