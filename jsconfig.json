@@ -7,5 +7,5 @@
             "ziggy-js": ["./vendor/tightenco/ziggy"]
         }
     },
-    "exclude": ["node_modules", "public"]
+    "exclude": ["node_modules", "vendor"]
 }
