@@ -1,4 +1,5 @@
 ﻿<script setup>
+// Mengimpor Link dari Inertia.js untuk navigasi halaman
 import { Link } from "@inertiajs/vue3";
 </script>
 
@@ -6,6 +7,7 @@ import { Link } from "@inertiajs/vue3";
     <div class="login-page">
         <!-- Bagian header merah -->
         <section class="login-hero">
+            <!-- Mengatur seluruh konten identitas aplikasi -->
             <Link href="/" class="brand-content">
                 <!-- Ilustrasi koki -->
                 <img
@@ -32,6 +34,7 @@ import { Link } from "@inertiajs/vue3";
 
         <!-- Bagian form login -->
         <main class="login-content">
+            <!-- Tempat menampilkan form login dari halaman Login.vue -->
             <div class="login-card">
                 <slot />
             </div>
@@ -98,8 +101,14 @@ import { Link } from "@inertiajs/vue3";
     max-width: none;
     object-fit: contain;
     flex-shrink: 0;
-    margin-top: -5px;
-    transform: translateY(-25px) scale(1.3);
+
+    /* Mengatur jarak gambar ayam dari judul */
+    margin-top: -15px;
+
+    /* Menurunkan gambar agar berada lebih ke tengah area merah */
+    transform: translateY(-45px) scale(1.3);
+
+    /* Menentukan titik awal transformasi dari bagian atas */
     transform-origin: center top;
 }
 
@@ -152,20 +161,25 @@ import { Link } from "@inertiajs/vue3";
         overflow: hidden;
     }
 
+    /* Menyesuaikan ukuran ilustrasi koki */
     .chef-image {
         width: 120px;
         height: 100px;
     }
 
-    /* Mempertahankan ukuran ayam dan menaikkan posisinya */
+    /* Mengatur ukuran dan posisi ayam pada HP kecil */
     .chicken-image {
         width: 120%;
         height: 260px;
         object-fit: contain;
-        transform: translateY(-55px) scale(1.2);
+
+        /* Menyesuaikan posisi ayam pada layar HP kecil */
+        transform: translateY(-45px) scale(1.2);
+
         transform-origin: center top;
     }
 
+    /* Menyesuaikan jarak form dari sisi layar */
     .login-content {
         padding-left: 22px;
         padding-right: 22px;
