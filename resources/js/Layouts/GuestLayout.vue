@@ -47,17 +47,26 @@ import { Link } from "@inertiajs/vue3";
 .login-page {
     width: 100%;
     max-width: 412px;
-    min-height: 917px;
+    min-height: 100vh;
+    min-height: 100dvh;
     margin: 0 auto;
+
+    /* Background merah agar terlihat pada sisi lengkungan card */
     background: #ca0708;
+
     overflow: hidden;
     font-family: Arial, Helvetica, sans-serif;
+
+    /* Menyusun header dan form secara vertikal */
+    display: flex;
+    flex-direction: column;
 }
 
 /* Mengatur bagian header merah */
 .login-hero {
     width: 100%;
     height: 480px;
+    flex-shrink: 0;
     background: #ca0708;
     position: relative;
     overflow: hidden;
@@ -108,21 +117,36 @@ import { Link } from "@inertiajs/vue3";
     /* Menurunkan gambar agar berada lebih ke tengah area merah */
     transform: translateY(-45px) scale(1.3);
 
-    /* Menentukan titik awal transformasi dari bagian atas */
+    /* Menentukan titik awal transformasi */
     transform-origin: center top;
 }
 
 /* Mengatur area form putih */
 .login-content {
     width: 100%;
+
+    /* Mengisi seluruh sisa tinggi halaman */
+    flex: 1;
+
+    /* Memastikan area putih tidak mengecil */
     min-height: 437px;
+
+    /* Bagian dalam card tetap putih */
     background: #ffffff;
-    border-radius: 36px 36px 0 0;
-    border-top: 2px solid #e5e5e5;
+
+    /* Membuat lengkungan lebih kecil seperti desain Figma */
+    border-radius: 32px 32px 0 0;
+
+    /* Memberikan garis tepi abu-abu yang halus */
+    border: 2px solid #e5e5e5;
+    border-bottom: none;
+
     margin-top: -1px;
     padding: 25px 28px 35px;
+
     position: relative;
     z-index: 2;
+    box-sizing: border-box;
 }
 
 /* Mengatur lebar konten form */
@@ -136,7 +160,8 @@ import { Link } from "@inertiajs/vue3";
 @media (min-width: 768px) {
     .login-page {
         width: 412px;
-        min-height: 917px;
+        min-height: 100vh;
+        min-height: 100dvh;
     }
 
     .login-hero {
@@ -146,7 +171,6 @@ import { Link } from "@inertiajs/vue3";
 
     .login-content {
         width: 412px;
-        min-height: 437px;
     }
 }
 
@@ -173,9 +197,8 @@ import { Link } from "@inertiajs/vue3";
         height: 260px;
         object-fit: contain;
 
-        /* Menyesuaikan posisi ayam pada layar HP kecil */
+        /* Menyesuaikan posisi ayam */
         transform: translateY(-45px) scale(1.2);
-
         transform-origin: center top;
     }
 

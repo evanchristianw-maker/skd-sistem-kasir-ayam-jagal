@@ -1,9 +1,17 @@
 <script setup>
+// Mengimpor ref untuk mengatur tampil/sembunyinya password
 import { ref } from "vue";
+
+// Mengimpor komponen Inertia.js
 import { Head, Link, useForm } from "@inertiajs/vue3";
+
+// Mengimpor layout halaman login
 import GuestLayout from "@/Layouts/GuestLayout.vue";
+
+// Mengimpor komponen untuk menampilkan pesan kesalahan
 import InputError from "@/Components/InputError.vue";
 
+// Mengatur properti yang diterima dari backend
 defineProps({
     canResetPassword: {
         type: Boolean,
@@ -13,10 +21,12 @@ defineProps({
     },
 });
 
+// Mengatur kondisi tampil/sembunyinya password
 const showPassword = ref(false);
 
+// Menyimpan data login pengguna
 const form = useForm({
-    email: "",
+    username: "",
     password: "",
     remember: false,
 });
@@ -31,6 +41,7 @@ const submit = () => {
 
 <template>
     <GuestLayout>
+        <!-- Mengatur judul halaman browser -->
         <Head title="Login - Sistem Kasir Ayam Jagal" />
 
         <div class="login-form">
@@ -53,22 +64,25 @@ const submit = () => {
                 </p>
             </div>
 
+            <!-- Form login pengguna -->
             <form @submit.prevent="submit">
                 <!-- Input username -->
                 <div class="form-group username-group">
-                    <label for="email">Username:</label>
+                    <label for="username">Username:</label>
 
                     <input
-                        id="email"
-                        v-model="form.email"
+                        id="username"
+                        v-model="form.username"
                         type="text"
                         autocomplete="username"
                         required
                         autofocus
                         class="login-input"
+                        placeholder="Masukkan username"
                     />
 
-                    <InputError class="mt-1" :message="form.errors.email" />
+                    <!-- Menampilkan pesan kesalahan username -->
+                    <InputError class="mt-1" :message="form.errors.username" />
                 </div>
 
                 <!-- Input password -->
@@ -83,8 +97,10 @@ const submit = () => {
                             autocomplete="current-password"
                             required
                             class="login-input"
+                            placeholder="Masukkan password"
                         />
 
+                        <!-- Tombol tampil/sembunyikan password -->
                         <button
                             type="button"
                             class="password-toggle"
@@ -95,6 +111,7 @@ const submit = () => {
                                     : 'Tampilkan password'
                             "
                         >
+                            <!-- Ikon password tersembunyi -->
                             <svg
                                 v-if="!showPassword"
                                 viewBox="0 0 24 24"
@@ -105,6 +122,7 @@ const submit = () => {
                                 />
                             </svg>
 
+                            <!-- Ikon password terlihat -->
                             <svg v-else viewBox="0 0 24 24" fill="currentColor">
                                 <path
                                     d="M2 3.4 3.4 2 22 20.6 20.6 22l-3.1-3.1c-1.7.8-3.6 1.1-5.5 1.1-5.5 0-9.8-3.4-11-7 0-1.7 1.6-3.7 4-5.2L2 3.4Zm10 1.6c5.5 0 9.8 3.4 11 7-.5 1.5-1.5 2.9-2.9 4l-3.2-3.2a4 4 0 0 0-5.4-5.4L9.2 5.1c.9-.1 1.8-.1 2.8-.1Z"
@@ -113,11 +131,13 @@ const submit = () => {
                         </button>
                     </div>
 
+                    <!-- Menampilkan pesan kesalahan password -->
                     <InputError class="mt-1" :message="form.errors.password" />
                 </div>
 
                 <!-- Checkbox dan lupa password -->
                 <div class="form-options">
+                    <!-- Checkbox ingat saya -->
                     <label class="remember-label">
                         <input
                             type="checkbox"
@@ -128,6 +148,7 @@ const submit = () => {
                         <span>Ingat saya</span>
                     </label>
 
+                    <!-- Tautan lupa password -->
                     <Link
                         v-if="canResetPassword"
                         :href="route('password.request')"
@@ -213,6 +234,7 @@ const submit = () => {
         box-shadow 0.2s;
 }
 
+/* Mengatur kondisi input ketika dipilih */
 .login-input:focus {
     border-color: #ca0708;
     box-shadow: 0 0 0 2px rgba(202, 7, 8, 0.1);
