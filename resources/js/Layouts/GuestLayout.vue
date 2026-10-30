@@ -1,52 +1,174 @@
 ﻿<script setup>
-import { Link } from '@inertiajs/vue3';
+import { Link } from "@inertiajs/vue3";
 </script>
 
 <template>
-    <div class="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4 py-10">
-        <!-- Background Decoration -->
-        <div class="absolute -left-24 -top-24 h-72 w-72 rounded-full bg-red-100/70 blur-3xl"></div>
-        <div class="absolute -bottom-24 -right-24 h-80 w-80 rounded-full bg-orange-100/70 blur-3xl"></div>
+    <div class="login-page">
+        <!-- Bagian header merah -->
+        <section class="login-hero">
+            <Link href="/" class="brand-content">
+                <!-- Ilustrasi koki -->
+                <img
+                    src="/assets/images/illustrations/ilustrasi-koki.png"
+                    alt="Ilustrasi Koki"
+                    class="chef-image"
+                />
 
-        <div class="relative z-10 w-full max-w-md">
-            <!-- Brand -->
-            <Link href="/" class="mb-8 flex flex-col items-center text-center">
-                <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-600 text-white shadow-lg shadow-red-200">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        class="h-9 w-9"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M12 3v2m0 14v2M5.64 5.64l1.42 1.42m9.88 9.88 1.42 1.42M3 12h2m14 0h2M5.64 18.36l1.42-1.42m9.88-9.88 1.42-1.42"
-                        />
-                        <circle cx="12" cy="12" r="6" />
-                    </svg>
-                </div>
-
-                <h1 class="mt-4 text-2xl font-extrabold tracking-tight text-slate-900">
-                    Ayam <span class="text-red-600">Jagal</span>
+                <!-- Judul sistem kasir -->
+                <h1>
+                    Sistem Kasir
+                    <br />
+                    UMKM Ayam Jagal
                 </h1>
 
-                <p class="mt-1 text-sm text-slate-500">
-                    Sistem Kasir Berbasis Website
-                </p>
+                <!-- Gambar ayam goreng -->
+                <img
+                    src="/assets/images/products/ayam-goreng.png"
+                    alt="Ayam Goreng"
+                    class="chicken-image"
+                />
             </Link>
+        </section>
 
-            <!-- Content -->
-            <div class="rounded-3xl border border-slate-100 bg-white p-6 shadow-xl shadow-slate-200/60 sm:p-8">
+        <!-- Bagian form login -->
+        <main class="login-content">
+            <div class="login-card">
                 <slot />
             </div>
-
-            <!-- Footer -->
-            <p class="mt-6 text-center text-xs text-slate-400">
-                © {{ new Date().getFullYear() }} UMKM Ayam Jagal
-            </p>
-        </div>
+        </main>
     </div>
 </template>
+
+<style scoped>
+/* Mengatur halaman utama */
+.login-page {
+    width: 100%;
+    max-width: 412px;
+    min-height: 917px;
+    margin: 0 auto;
+    background: #ca0708;
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Mengatur bagian header merah */
+.login-hero {
+    width: 100%;
+    height: 480px;
+    background: #ca0708;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Mengatur susunan elemen header */
+.brand-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    position: relative;
+}
+
+/* Mengatur ilustrasi koki */
+.chef-image {
+    width: 135px;
+    height: 109px;
+    object-fit: contain;
+    margin-top: 45px;
+    flex-shrink: 0;
+}
+
+/* Mengatur judul sistem kasir */
+.brand-content h1 {
+    margin-top: 8px;
+    color: #ffffff;
+    font-size: 23px;
+    line-height: 29px;
+    font-weight: 700;
+    text-align: center;
+}
+
+/* Mengatur gambar ayam goreng */
+.chicken-image {
+    display: block;
+    width: 412px;
+    height: 280px;
+    max-width: none;
+    object-fit: contain;
+    flex-shrink: 0;
+    margin-top: -5px;
+    transform: translateY(-25px) scale(1.3);
+    transform-origin: center top;
+}
+
+/* Mengatur area form putih */
+.login-content {
+    width: 100%;
+    min-height: 437px;
+    background: #ffffff;
+    border-radius: 36px 36px 0 0;
+    border-top: 2px solid #e5e5e5;
+    margin-top: -1px;
+    padding: 25px 28px 35px;
+    position: relative;
+    z-index: 2;
+}
+
+/* Mengatur lebar konten form */
+.login-card {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Mengatur tampilan desktop */
+@media (min-width: 768px) {
+    .login-page {
+        width: 412px;
+        min-height: 917px;
+    }
+
+    .login-hero {
+        width: 412px;
+        height: 480px;
+    }
+
+    .login-content {
+        width: 412px;
+        min-height: 437px;
+    }
+}
+
+/* Menyesuaikan tampilan HP kecil */
+@media (max-width: 380px) {
+    .login-page {
+        width: 100%;
+    }
+
+    .login-hero {
+        height: 450px;
+        overflow: hidden;
+    }
+
+    .chef-image {
+        width: 120px;
+        height: 100px;
+    }
+
+    /* Mempertahankan ukuran ayam dan menaikkan posisinya */
+    .chicken-image {
+        width: 120%;
+        height: 260px;
+        object-fit: contain;
+        transform: translateY(-55px) scale(1.2);
+        transform-origin: center top;
+    }
+
+    .login-content {
+        padding-left: 22px;
+        padding-right: 22px;
+    }
+}
+</style>
