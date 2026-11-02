@@ -1054,7 +1054,7 @@ onBeforeUnmount(() => {
                 <span>Dashboard</span>
             </Link>
 
-            <button type="button" class="nav-item" disabled>
+            <Link href="/menu" class="nav-item">
                 <svg viewBox="0 0 24 24" fill="none">
                     <rect
                         x="4"
@@ -1072,7 +1072,7 @@ onBeforeUnmount(() => {
                     />
                 </svg>
                 <span>Menu</span>
-            </button>
+            </Link>
 
             <button type="button" class="nav-item" disabled>
                 <svg viewBox="0 0 24 24" fill="none">
