@@ -4,12 +4,11 @@ namespace App\Models;
 
 // Mengimpor factory untuk pembuatan data pengguna
 use Database\Factories\UserFactory;
-
 // Mengimpor atribut untuk mengatur kolom yang dapat diisi
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-
 // Mengimpor atribut untuk menyembunyikan data sensitif
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 // Mengimpor fitur factory dan autentikasi Laravel
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -50,5 +49,13 @@ class User extends Authenticatable
             // Password akan disimpan dalam bentuk hash
             'password' => 'hashed',
         ];
+    }
+
+    /**
+    * Relasi user dengan transaksi yang dilayani.
+    */
+    public function transaksis(): HasMany
+    {
+        return $this->hasMany(Transaksi::class);
     }
 }
