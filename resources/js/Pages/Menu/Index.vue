@@ -1,91 +1,39 @@
 <script setup>
 import { ref, computed } from "vue";
-import { Link } from "@inertiajs/vue3";
+import { router, Link } from "@inertiajs/vue3";
+import AdminLayout from "@/Layouts/AdminLayout.vue";
 
+// Menerima data menu dari Laravel
+const props = defineProps({
+    menus: {
+        type: Array,
+        default: () => [],
+    },
+});
+
+// State halaman
 const searchQuery = ref("");
 const selectedCategory = ref("Semua");
+
 const showModal = ref(false);
 const showDeleteModal = ref(false);
+
 const isEditing = ref(false);
 const selectedMenuId = ref(null);
 
-const categories = ["Semua", "Makanan", "Minuman", "Paket", "Tambahan"];
+// Daftar kategori
+const categories = [
+    "Semua",
+    "Makanan",
+    "Minuman",
+    "Paket",
+    "Tambahan",
+];
 
-const menus = ref([
-    {
-        id: 1,
-        name: "Ayam Geprek Original",
-        category: "Makanan",
-        price: 15000,
-        status: true,
-        description: "Ayam crispy dengan sambal geprek original.",
-        image: "",
-    },
-    {
-        id: 2,
-        name: "Ayam Geprek Mozarella",
-        category: "Makanan",
-        price: 20000,
-        status: true,
-        description: "Ayam geprek dengan topping keju mozarella.",
-        image: "",
-    },
-    {
-        id: 3,
-        name: "Ayam Bakar",
-        category: "Makanan",
-        price: 18000,
-        status: true,
-        description: "Ayam bakar dengan bumbu khas.",
-        image: "",
-    },
-    {
-        id: 4,
-        name: "Paket Ayam Geprek",
-        category: "Paket",
-        price: 22000,
-        status: true,
-        description: "Ayam geprek, nasi, dan minuman.",
-        image: "",
-    },
-    {
-        id: 5,
-        name: "Es Teh",
-        category: "Minuman",
-        price: 5000,
-        status: true,
-        description: "Es teh manis segar.",
-        image: "",
-    },
-    {
-        id: 6,
-        name: "Es Jeruk",
-        category: "Minuman",
-        price: 7000,
-        status: false,
-        description: "Es jeruk segar.",
-        image: "",
-    },
-    {
-        id: 7,
-        name: "Nasi Putih",
-        category: "Tambahan",
-        price: 5000,
-        status: true,
-        description: "Nasi putih satu porsi.",
-        image: "",
-    },
-    {
-        id: 8,
-        name: "Sambal Tambahan",
-        category: "Tambahan",
-        price: 3000,
-        status: true,
-        description: "Sambal tambahan.",
-        image: "",
-    },
-]);
+// Data menu dari database
+const menus = ref(props.menus);
 
+// Form tambah dan edit menu
 const form = ref({
     name: "",
     category: "Makanan",
@@ -94,6 +42,7 @@ const form = ref({
     image: "",
 });
 
+// Filter menu berdasarkan pencarian dan kategori
 const filteredMenus = computed(() => {
     return menus.value.filter((menu) => {
         const matchesSearch = menu.name
@@ -108,16 +57,18 @@ const filteredMenus = computed(() => {
     });
 });
 
+// Menghitung jumlah menu
 const totalMenus = computed(() => menus.value.length);
 
-const activeMenus = computed(
-    () => menus.value.filter((menu) => menu.status).length,
+const activeMenus = computed(() =>
+    menus.value.filter((menu) => menu.status).length
 );
 
-const inactiveMenus = computed(
-    () => menus.value.filter((menu) => !menu.status).length,
+const inactiveMenus = computed(() =>
+    menus.value.filter((menu) => !menu.status).length
 );
 
+// Format harga ke Rupiah
 const formatPrice = (price) => {
     return new Intl.NumberFormat("id-ID", {
         style: "currency",
@@ -126,6 +77,7 @@ const formatPrice = (price) => {
     }).format(price);
 };
 
+// Membuka modal tambah menu
 const openAddModal = () => {
     isEditing.value = false;
     selectedMenuId.value = null;
@@ -141,6 +93,7 @@ const openAddModal = () => {
     showModal.value = true;
 };
 
+// Membuka modal edit menu
 const openEditModal = (menu) => {
     isEditing.value = true;
     selectedMenuId.value = menu.id;
@@ -149,12 +102,14 @@ const openEditModal = (menu) => {
         name: menu.name,
         category: menu.category,
         price: menu.price,
-        description: menu.description,
-        image: menu.image,
+        description: menu.description || "",
+        image: menu.image || "",
     };
 
     showModal.value = true;
 };
+
+// Menyimpan menu
 
 const saveMenu = () => {
     if (
@@ -166,48 +121,94 @@ const saveMenu = () => {
         return;
     }
 
-    if (isEditing.value) {
-        const index = menus.value.findIndex(
-            (menu) => menu.id === selectedMenuId.value,
-        );
+    const data = {
+        nama_menu: form.value.name,
+        kategori: form.value.category,
+        harga: form.value.price,
+    };
 
-        if (index !== -1) {
-            menus.value[index] = {
-                ...menus.value[index],
-                ...form.value,
-                price: Number(form.value.price),
-            };
-        }
-    } else {
-        menus.value.unshift({
-            id: Date.now(),
-            ...form.value,
-            price: Number(form.value.price),
-            status: true,
+    // Jika sedang menambahkan menu baru
+    if (!isEditing.value) {
+        router.post("/menu", data, {
+            onSuccess: (page) => {
+                menus.value = page.props.menus;
+                showModal.value = false;
+
+                form.value = {
+                    name: "",
+                    category: "Makanan",
+                    price: "",
+                    description: "",
+                    image: "",
+                };
+            },
+            onError: (errors) => {
+                console.log("Terjadi kesalahan:", errors);
+            },
         });
+
+        return;
     }
 
-    showModal.value = false;
+    // Jika sedang mengedit menu
+    router.put(`/menu/${selectedMenuId.value}`, data, {
+        onSuccess: (page) => {
+            menus.value = page.props.menus;
+            showModal.value = false;
+
+            form.value = {
+                name: "",
+                category: "Makanan",
+                price: "",
+                description: "",
+                image: "",
+            };
+        },
+        onError: (errors) => {
+            console.log("Terjadi kesalahan:", errors);
+        },
+    });
 };
 
+// Membuka konfirmasi hapus
 const confirmDelete = (menu) => {
     selectedMenuId.value = menu.id;
     showDeleteModal.value = true;
 };
 
+// Menghapus menu sementara dari tampilan
+// Menghapus menu dari database
 const deleteMenu = () => {
-    menus.value = menus.value.filter(
-        (menu) => menu.id !== selectedMenuId.value,
-    );
+    if (!selectedMenuId.value) {
+        return;
+    }
 
-    showDeleteModal.value = false;
-    selectedMenuId.value = null;
+    router.delete(`/menu/${selectedMenuId.value}`, {
+        onSuccess: (page) => {
+            menus.value = page.props.menus;
+
+            showDeleteModal.value = false;
+            selectedMenuId.value = null;
+        },
+        onError: (errors) => {
+            console.log("Gagal menghapus menu:", errors);
+        },
+    });
 };
 
+// Mengubah status menu melalui database
 const toggleStatus = (menu) => {
-    menu.status = !menu.status;
+    router.patch(`/menu/${menu.id}/status`, {}, {
+        onSuccess: (page) => {
+            menus.value = page.props.menus;
+        },
+        onError: (errors) => {
+            console.log("Gagal mengubah status menu:", errors);
+        },
+    });
 };
 
+// Upload gambar untuk preview
 const handleImageUpload = (event) => {
     const file = event.target.files[0];
 
@@ -222,42 +223,9 @@ const handleImageUpload = (event) => {
 };
 </script>
 
+
 <template>
-    <div class="app-layout">
-        <!-- HEADER -->
-        <header class="top-header">
-            <div class="header-inner">
-                <Link href="/dashboard" class="brand">
-                    <div class="brand-logo">
-                        <img
-                            src="/assets/images/illustrations/ilustrasi-koki.png"
-                            alt="Logo UMKM Ayam Jagal"
-                        />
-                    </div>
-
-                    <div class="brand-text">
-                        <h2>Ayam Jagal</h2>
-                        <span>Point of Sale System</span>
-                    </div>
-                </Link>
-
-                <div class="header-right">
-                    <div class="header-date">
-                        <span class="date-icon">▦</span>
-                        <span>{{
-                            new Date().toLocaleDateString("id-ID", {
-                                day: "numeric",
-                                month: "long",
-                                year: "numeric",
-                            })
-                        }}</span>
-                    </div>
-
-                    <div class="profile-avatar">A</div>
-                </div>
-            </div>
-        </header>
-
+    <AdminLayout active-page="menu">
         <!-- MAIN CONTENT -->
         <main class="main-content">
             <div class="page-heading">
@@ -454,29 +422,6 @@ const handleImageUpload = (event) => {
             </section>
         </main>
 
-        <!-- BOTTOM NAVIGATION -->
-        <nav class="bottom-navigation">
-            <Link href="/dashboard" class="nav-item">
-                <span class="nav-icon">⌂</span>
-                <span>Dashboard</span>
-            </Link>
-
-            <a href="#" class="nav-item active" @click.prevent>
-                <span class="nav-icon">▤</span>
-                <span>Menu</span>
-            </a>
-
-            <a href="#" class="nav-item disabled" @click.prevent>
-                <span class="nav-icon">▣</span>
-                <span>Penjualan</span>
-            </a>
-
-            <a href="#" class="nav-item disabled" @click.prevent>
-                <span class="nav-icon">▥</span>
-                <span>Keuangan</span>
-            </a>
-        </nav>
-
         <!-- ADD / EDIT MODAL -->
         <div
             v-if="showModal"
@@ -602,7 +547,7 @@ const handleImageUpload = (event) => {
                 </div>
             </div>
         </div>
-    </div>
+    </AdminLayout>
 </template>
 
 <style>
@@ -635,92 +580,6 @@ textarea {
 
 button {
     cursor: pointer;
-}
-
-.app-layout {
-    min-height: 100vh;
-    padding-bottom: 90px;
-}
-
-/* HEADER */
-.top-header {
-    background: linear-gradient(110deg, #ca0708, #a80000);
-    color: white;
-    padding: 15px 6%;
-    box-shadow: 0 3px 15px rgba(100, 0, 0, 0.12);
-}
-
-.header-inner {
-    max-width: 1400px;
-    margin: auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    color: white;
-    text-decoration: none;
-}
-
-.brand-logo {
-    width: 45px;
-    height: 45px;
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    display: grid;
-    place-items: center;
-}
-
-.brand-logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-}
-
-.brand-text h2 {
-    font-size: 17px;
-    margin: 0;
-    font-weight: 750;
-}
-
-.brand-text span {
-    display: block;
-    font-size: 11px;
-    margin-top: 3px;
-    opacity: 0.8;
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-}
-
-.header-date {
-    font-size: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.date-icon {
-    font-size: 18px;
-}
-
-.profile-avatar {
-    width: 37px;
-    height: 37px;
-    background: white;
-    color: var(--primary);
-    display: grid;
-    place-items: center;
-    border-radius: 50%;
-    font-weight: 800;
 }
 
 /* MAIN */
@@ -1112,48 +971,6 @@ tbody tr:last-child td {
     color: var(--muted);
 }
 
-/* BOTTOM NAVIGATION */
-.bottom-navigation {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    min-height: 68px;
-    background: white;
-    border-top: 1px solid #eceef1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 75px;
-    z-index: 50;
-    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.035);
-}
-
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    text-decoration: none;
-    color: #969ba5;
-    font-size: 10px;
-    font-weight: 600;
-    min-width: 55px;
-}
-
-.nav-icon {
-    font-size: 20px;
-}
-
-.nav-item.active {
-    color: var(--primary);
-}
-
-.nav-item.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
 /* MODAL */
 .modal-overlay {
     position: fixed;
@@ -1321,10 +1138,6 @@ tbody tr:last-child td {
         padding: 28px 4%;
     }
 
-    .top-header {
-        padding: 14px 4%;
-    }
-
     .toolbar {
         align-items: flex-start;
         flex-direction: column;
@@ -1333,17 +1146,9 @@ tbody tr:last-child td {
     .search-box {
         width: 100%;
     }
-
-    .bottom-navigation {
-        gap: 35px;
-    }
 }
 
 @media (max-width: 600px) {
-    .app-layout {
-        padding-bottom: 82px;
-    }
-
     .main-content {
         padding: 23px 15px;
     }
@@ -1394,20 +1199,6 @@ tbody tr:last-child td {
 
     .category-filter button {
         flex-shrink: 0;
-    }
-
-    .bottom-navigation {
-        justify-content: space-around;
-        gap: 0;
-        min-height: 65px;
-    }
-
-    .nav-item {
-        font-size: 9px;
-    }
-
-    .header-date {
-        display: none;
     }
 
     .form-row {
