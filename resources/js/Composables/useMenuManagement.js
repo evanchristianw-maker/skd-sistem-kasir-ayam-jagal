@@ -1,0 +1,258 @@
+import { ref, computed } from "vue";
+import { router, usePage } from "@inertiajs/vue3";
+
+export default function useMenuManagement(initialMenus = []) {
+    const page = usePage();
+
+    // ADMIN INFORMATION
+    const adminName = computed(
+        () => page.props.auth?.user?.name || "Administrator",
+    );
+
+    // MENU DATA
+    const menus = ref(initialMenus);
+
+    const searchQuery = ref("");
+    const selectedCategory = ref("Semua");
+
+    // MODAL STATE
+    const showModal = ref(false);
+    const showDeleteModal = ref(false);
+    const isEditing = ref(false);
+
+    const selectedMenuId = ref(null);
+
+    // CATEGORY
+    const categories = ["Semua", "Makanan", "Minuman", "Paket", "Tambahan"];
+
+    // FORM
+    const emptyForm = () => ({
+        name: "",
+        category: "Makanan",
+        price: "",
+        description: "",
+        image: "",
+    });
+
+    const form = ref(emptyForm());
+
+    // FILTER MENU
+    const filteredMenus = computed(() => {
+        return menus.value.filter((menu) => {
+            const search = String(menu.name ?? "")
+                .toLowerCase()
+                .includes(searchQuery.value.toLowerCase().trim());
+
+            const category =
+                selectedCategory.value === "Semua" ||
+                menu.category === selectedCategory.value;
+
+            return search && category;
+        });
+    });
+
+    // MENU STATISTICS
+    const totalMenus = computed(() => menus.value.length);
+
+    const activeMenus = computed(
+        () => menus.value.filter((menu) => Boolean(menu.status)).length,
+    );
+
+    const inactiveMenus = computed(
+        () => menus.value.filter((menu) => !menu.status).length,
+    );
+
+    // CURRENT DATE
+    const currentDate = computed(() =>
+        new Date().toLocaleDateString("id-ID", {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+        }),
+    );
+
+    // PRICE FORMAT
+    const formatPrice = (price) => {
+        return new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
+            maximumFractionDigits: 0,
+        }).format(Number(price) || 0);
+    };
+
+    // SYNCHRONIZE MENU DATA
+    const sync = (response) => {
+        if (Array.isArray(response.props?.menus)) {
+            menus.value = response.props.menus;
+        }
+    };
+
+    // IMAGE PREVIEW CLEANUP
+    const clearImagePreview = () => {
+        if (form.value.image?.startsWith("blob:")) {
+            URL.revokeObjectURL(form.value.image);
+        }
+    };
+
+    // OPEN ADD MODAL
+    function openAddModal() {
+        clearImagePreview();
+
+        isEditing.value = false;
+        selectedMenuId.value = null;
+
+        form.value = emptyForm();
+        showModal.value = true;
+    }
+
+    // OPEN EDIT MODAL
+    function openEditModal(menu) {
+        clearImagePreview();
+
+        isEditing.value = true;
+        selectedMenuId.value = menu.id;
+
+        form.value = {
+            name: menu.name ?? "",
+            category: menu.category ?? "Makanan",
+            price: menu.price ?? "",
+            description: menu.description ?? "",
+            image: menu.image ?? "",
+        };
+
+        showModal.value = true;
+    }
+
+    // SAVE MENU
+    function saveMenu() {
+        const name = form.value.name.trim();
+        const price = Number(form.value.price);
+
+        if (!name || !Number.isFinite(price) || price <= 0) {
+            window.alert("Nama dan harga menu harus diisi dengan benar.");
+            return;
+        }
+
+        // Sesuaikan dengan field yang diterima MenuController.php
+        const data = {
+            nama_menu: name,
+            kategori: form.value.category,
+            harga: price,
+        };
+
+        const options = {
+            preserveScroll: true,
+
+            onSuccess: (response) => {
+                sync(response);
+
+                showModal.value = false;
+                clearImagePreview();
+                form.value = emptyForm();
+            },
+
+            onError: (errors) => {
+                console.error("Gagal menyimpan menu:", errors);
+            },
+        };
+
+        if (isEditing.value) {
+            router.put(`/menu/${selectedMenuId.value}`, data, options);
+        } else {
+            router.post("/menu", data, options);
+        }
+    }
+
+    // OPEN DELETE MODAL
+    function confirmDelete(menu) {
+        selectedMenuId.value = menu.id;
+        showDeleteModal.value = true;
+    }
+
+    // DELETE MENU
+    function deleteMenu() {
+        if (!selectedMenuId.value) return;
+
+        router.delete(`/menu/${selectedMenuId.value}`, {
+            preserveScroll: true,
+
+            onSuccess: (response) => {
+                sync(response);
+
+                showDeleteModal.value = false;
+                selectedMenuId.value = null;
+            },
+
+            onError: (errors) => {
+                console.error("Gagal menghapus menu:", errors);
+            },
+        });
+    }
+
+    // TOGGLE MENU STATUS
+    function toggleStatus(menu) {
+        router.patch(
+            `/menu/${menu.id}/status`,
+            {},
+            {
+                preserveScroll: true,
+
+                onSuccess: sync,
+
+                onError: (errors) => {
+                    console.error("Gagal mengubah status menu:", errors);
+                },
+            },
+        );
+    }
+
+    // IMAGE UPLOAD PREVIEW
+    function handleImageUpload(event) {
+        const file = event.target.files?.[0];
+
+        if (!file) return;
+
+        if (!file.type.startsWith("image/")) {
+            window.alert("File harus berupa gambar.");
+            event.target.value = "";
+            return;
+        }
+
+        clearImagePreview();
+
+        form.value.image = URL.createObjectURL(file);
+    }
+
+    return {
+        adminName,
+        menus,
+        searchQuery,
+        selectedCategory,
+
+        showModal,
+        showDeleteModal,
+        isEditing,
+
+        categories,
+        form,
+
+        filteredMenus,
+        totalMenus,
+        activeMenus,
+        inactiveMenus,
+
+        currentDate,
+        formatPrice,
+
+        openAddModal,
+        openEditModal,
+        saveMenu,
+
+        confirmDelete,
+        deleteMenu,
+        toggleStatus,
+
+        handleImageUpload,
+    };
+}
