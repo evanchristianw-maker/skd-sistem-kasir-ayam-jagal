@@ -1,4 +1,3 @@
-```vue
 <script setup>
 import { computed } from "vue";
 
@@ -182,23 +181,17 @@ const summaryCards = computed(() => [
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-
     width: 100%;
     min-width: 0;
     min-height: 190px;
     padding: 22px;
-
     overflow: hidden;
-
     border: 1px solid #ededed;
     border-radius: 17px;
-
     background: #ffffff;
     box-shadow: 0 4px 15px rgba(20, 20, 20, 0.035);
-
     animation: summaryFadeUp 0.55s ease both;
     animation-delay: calc(var(--card-index) * 0.08s);
-
     transition:
         transform 0.25s ease,
         box-shadow 0.25s ease;
@@ -209,14 +202,11 @@ const summaryCards = computed(() => [
     position: absolute;
     top: -45px;
     right: -45px;
-
     width: 120px;
     height: 120px;
-
     border-radius: 50%;
     opacity: 0.05;
     background: currentColor;
-
     pointer-events: none;
 }
 
@@ -236,11 +226,9 @@ const summaryCards = computed(() => [
     display: flex;
     align-items: center;
     justify-content: center;
-
     width: 49px;
     height: 49px;
     flex: 0 0 49px;
-
     border-radius: 13px;
 }
 
@@ -284,7 +272,6 @@ const summaryCards = computed(() => [
 
 .summary-card-bottom p {
     margin: 0 0 8px;
-
     color: #626875;
     font-size: 14px;
     font-weight: 500;
@@ -292,19 +279,16 @@ const summaryCards = computed(() => [
 
 .summary-card-bottom h3 {
     margin: 0;
-
     color: #202124;
     font-size: 25px;
     font-weight: 800;
     letter-spacing: -0.5px;
-
     overflow-wrap: anywhere;
 }
 
 .summary-card-bottom > span {
     display: block;
     margin-top: 7px;
-
     color: #777e89;
     font-size: 12px;
 }
@@ -363,4 +347,3 @@ const summaryCards = computed(() => [
     }
 }
 </style>
-```
