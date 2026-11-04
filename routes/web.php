@@ -1,11 +1,10 @@
-
 <?php
 
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MenuController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TransaksiController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\TransaksiController;
 use Inertia\Inertia;
 
 Route::get('/', function () {
@@ -18,28 +17,30 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
+    return Inertia::render('Admin/Dashboard/Index');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
 
-    // Menampilkan daftar menu
+    // Manajemen Menu
     Route::get('/menu', [MenuController::class, 'index'])
         ->name('menu.index');
 
-    // Menambahkan menu baru
     Route::post('/menu', [MenuController::class, 'store'])
         ->name('menu.store');
 
-    // Memperbarui menu
     Route::put('/menu/{menu}', [MenuController::class, 'update'])
         ->name('menu.update');
 
     Route::delete('/menu/{menu}', [MenuController::class, 'destroy'])
-    ->name('menu.destroy');
+        ->name('menu.destroy');
 
     Route::patch('/menu/{menu}/status', [MenuController::class, 'toggleStatus'])
-    ->name('menu.toggleStatus');
+        ->name('menu.toggleStatus');
+
+    // Transaksi
+    Route::post('/transaksi', [TransaksiController::class, 'store'])
+        ->name('transaksi.store');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])
@@ -50,10 +51,6 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
-    
-    // Membuat transaksi baru
-    Route::post('/transaksi', [TransaksiController::class, 'store'])
-        ->name('transaksi.store');
 });
 
 require __DIR__.'/auth.php';

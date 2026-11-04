@@ -26,8 +26,8 @@ class MenuController extends Controller
             ];
         });
 
-        return Inertia::render('Menu/Index', [
-            'menus' => $menus,
+        return Inertia::render('Admin/Menu/Index', [
+        'menus' => $menus,
         ]);
     }
 
