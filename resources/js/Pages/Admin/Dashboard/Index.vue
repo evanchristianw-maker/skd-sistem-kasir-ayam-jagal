@@ -1,11 +1,11 @@
-﻿<script setup>
+<script setup>
 import DashboardSidebar from "@/Components/Admin/Dashboard/DashboardSidebar.vue";
 import DashboardTransactions from "@/Components/Admin/Dashboard/DashboardTransactions.vue";
-import DashboardLogoutModal from "@/Components/Admin/Dashboard/DashboardLogoutModal.vue";
+import AdminLogoutModal from "@/Components/Admin/Shared/AdminLogoutModal.vue";
 import DashboardChart from "@/Components/Admin/Dashboard/DashboardChart.vue";
 import { ref, computed, onMounted, onBeforeUnmount } from "vue";
 import { Link, router, usePage } from "@inertiajs/vue3";
-import DashboardHeader from "@/Components/Admin/Dashboard/DashboardHeader.vue";
+import AdminHeader from "@/Components/Admin/Shared/AdminHeader.vue";
 import DashboardSummary from "@/Components/Admin/Dashboard/DashboardSummary.vue";
 
 const props = defineProps({
@@ -431,7 +431,7 @@ onBeforeUnmount(() => {
 
 <template>
     <div class="app-layout">
-        <DashboardHeader
+        <AdminHeader
             :admin-name="adminName"
             :admin-email="adminEmail"
             :current-date="currentDate"
@@ -512,7 +512,7 @@ onBeforeUnmount(() => {
 
         <DashboardSidebar />
 
-        <DashboardLogoutModal :show="showingLogoutConfirmation" @cancel="cancelLogout" @confirm="logout" />
+        <AdminLogoutModal :show="showingLogoutConfirmation" @cancel="cancelLogout" @confirm="logout" />
     </div>
 </template>
 
@@ -688,12 +688,3 @@ onBeforeUnmount(() => {
     }
 }
 </style>
-
-
-
-
-
-
-
-
-
