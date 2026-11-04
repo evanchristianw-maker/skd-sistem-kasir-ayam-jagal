@@ -6,13 +6,13 @@ const page = usePage();
 
 const currentPath = computed(() => page.url.split("?")[0]);
 
-const isDashboardActive = computed(
-    () => currentPath.value === "/dashboard",
-);
+const isDashboardActive = computed(() => currentPath.value === "/dashboard");
 
-const isMenuActive = computed(
-    () => currentPath.value === "/menu",
-);
+const isMenuActive = computed(() => currentPath.value === "/menu");
+
+const isSalesActive = computed(() => currentPath.value === "/sales");
+
+const isFinanceActive = computed(() => currentPath.value === "/finance");
 </script>
 
 <template>
@@ -38,7 +38,6 @@ const isMenuActive = computed(
                     stroke-linejoin="round"
                 />
             </svg>
-
             <span>Dashboard</span>
         </Link>
 
@@ -65,12 +64,16 @@ const isMenuActive = computed(
                     stroke-width="1.5"
                 />
             </svg>
-
             <span>Menu</span>
         </Link>
 
         <!-- Penjualan -->
-        <div class="nav-item disabled" aria-disabled="true">
+        <Link
+            href="/sales"
+            class="nav-item"
+            :class="{ active: isSalesActive }"
+            :aria-current="isSalesActive ? 'page' : undefined"
+        >
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path
                     d="M12 3V12H21"
@@ -85,12 +88,16 @@ const isMenuActive = computed(
                     stroke-linecap="round"
                 />
             </svg>
-
             <span>Penjualan</span>
-        </div>
+        </Link>
 
         <!-- Keuangan -->
-        <div class="nav-item disabled" aria-disabled="true">
+        <Link
+            href="/finance"
+            class="nav-item"
+            :class="{ active: isFinanceActive }"
+            :aria-current="isFinanceActive ? 'page' : undefined"
+        >
             <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <rect
                     x="3"
@@ -108,9 +115,8 @@ const isMenuActive = computed(
                     stroke-linecap="round"
                 />
             </svg>
-
             <span>Keuangan</span>
-        </div>
+        </Link>
     </nav>
 </template>
 
@@ -120,47 +126,35 @@ const isMenuActive = computed(
     bottom: 0;
     left: 0;
     z-index: 90;
-
     width: 100%;
     min-height: 84px;
-
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: center;
-
     padding: 8px max(calc((100vw - 650px) / 2), 12px);
-
     border-top: 1px solid #eeeeee;
     background: rgba(255, 255, 255, 0.97);
     box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.035);
-
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }
 
 .nav-item {
     position: relative;
-
     min-width: 0;
     min-height: 62px;
-
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 7px;
-
     border: none;
     border-radius: 12px;
-
     color: #777e89;
     background: transparent;
-
     text-decoration: none;
     font-family: inherit;
-
     cursor: pointer;
-
     transition:
         color 0.2s ease,
         background-color 0.2s ease,
@@ -179,16 +173,15 @@ const isMenuActive = computed(
     line-height: 1.2;
 }
 
-.nav-item:not(.disabled):hover {
+.nav-item:hover {
     color: #ca0708;
     background: #fff7f7;
 }
 
-.nav-item:not(.disabled):active {
+.nav-item:active {
     transform: scale(0.96);
 }
 
-/* Halaman aktif */
 .nav-item.active {
     color: #ca0708;
     background: #fff0f0;
@@ -196,26 +189,15 @@ const isMenuActive = computed(
 
 .nav-item.active::before {
     content: "";
-
     position: absolute;
     top: -8px;
-
     width: 25px;
     height: 4px;
-
     border-radius: 10px;
     background: #ca0708;
-
     animation: indicatorAppear 0.25s ease both;
 }
 
-/* Navigasi yang belum tersedia */
-.nav-item.disabled {
-    cursor: not-allowed;
-    opacity: 0.65;
-}
-
-/* Animasi indikator */
 @keyframes indicatorAppear {
     from {
         opacity: 0;
@@ -228,7 +210,6 @@ const isMenuActive = computed(
     }
 }
 
-/* Tablet dan mobile */
 @media (max-width: 768px) {
     .bottom-navigation {
         min-height: 88px;
@@ -250,14 +231,12 @@ const isMenuActive = computed(
     }
 }
 
-/* Layar kecil */
 @media (max-width: 380px) {
     .nav-item span {
         font-size: 11px;
     }
 }
 
-/* Aksesibilitas animasi */
 @media (prefers-reduced-motion: reduce) {
     .nav-item {
         transition: none;

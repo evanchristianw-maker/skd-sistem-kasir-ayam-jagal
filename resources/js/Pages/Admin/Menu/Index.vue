@@ -3,8 +3,8 @@ import { ref, computed } from "vue";
 import { router, usePage } from "@inertiajs/vue3";
 
 // DASHBOARD COMPONENTS
-import DashboardHeader from "@/Components/Admin/Dashboard/DashboardHeader.vue";
-import DashboardLogoutModal from "@/Components/Admin/Dashboard/DashboardLogoutModal.vue";
+import AdminHeader from "@/Components/Admin/Shared/AdminHeader.vue";
+import AdminLogoutModal from "@/Components/Admin/Shared/AdminLogoutModal.vue";
 
 // MENU COMPONENTS
 import MenuSummary from "@/Components/Admin/Menu/MenuSummary.vue";
@@ -78,7 +78,7 @@ const {
 <template>
     <div class="app-layout">
         <!-- DASHBOARD HEADER -->
-        <DashboardHeader
+        <AdminHeader
             :admin-name="adminName"
             :admin-email="adminEmail"
             :current-date="currentDate"
@@ -141,7 +141,7 @@ const {
                 <!-- FOOTER -->
                 <footer class="menu-footer">
                     <p>
-                        © {{ new Date().getFullYear() }}
+                        Â© {{ new Date().getFullYear() }}
                         <strong>UMKM Ayam Jagal</strong>. All rights reserved.
                     </p>
 
@@ -172,7 +172,7 @@ const {
         />
 
         <!-- DASHBOARD LOGOUT MODAL -->
-        <DashboardLogoutModal
+        <AdminLogoutModal
             :show="showingLogoutConfirmation"
             @cancel="cancelLogout"
             @confirm="logout"
