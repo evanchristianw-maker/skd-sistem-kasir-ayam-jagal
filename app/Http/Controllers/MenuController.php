@@ -105,4 +105,26 @@ class MenuController extends Controller
             ->route('menu.index')
             ->with('success', 'Status menu berhasil diperbarui.');
     }
+
+    /**
+     * Menampilkan daftar menu aktif untuk kasir.
+     */
+    public function cashierIndex(): Response
+    {
+        $menus = Menu::where('status_menu', true)
+            ->latest()
+            ->get()
+            ->map(function ($menu) {
+                return [
+                    'id' => $menu->id,
+                    'name' => $menu->nama_menu,
+                    'category' => $menu->kategori,
+                    'price' => (float) $menu->harga,
+                ];
+            });
+
+        return Inertia::render('Cashier/Transactions/Index', [
+            'menus' => $menus,
+        ]);
+    }
 }

@@ -12,12 +12,18 @@ class Transaksi extends Model
         'nomor_transaksi',
         'user_id',
         'total_harga',
+        'metode_pembayaran',
+        'uang_dibayarkan',
+        'kembalian',
+        'status',
     ];
 
     protected function casts(): array
     {
         return [
             'total_harga' => 'decimal:2',
+            'uang_dibayarkan' => 'decimal:2',
+            'kembalian' => 'decimal:2',
         ];
     }
 

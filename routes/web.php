@@ -75,9 +75,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 Route::middleware(['auth', 'role:kasir'])->group(function () {
 
     // Halaman Transaksi Kasir
-    Route::get('/cashier/transaksi', function () {
-        return Inertia::render('Cashier/Transactions/Index');
-    })->name('cashier.transactions.index');
+    Route::get('/cashier/transaksi', [MenuController::class, 'cashierIndex'])
+    ->name('cashier.transactions.index');
 
     // Menyimpan Transaksi
     Route::post('/transaksi', [TransaksiController::class, 'store'])
