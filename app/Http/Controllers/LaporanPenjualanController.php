@@ -57,8 +57,18 @@ class LaporanPenjualanController extends Controller
                 'cashier' => $item->user->nama_lengkap ?? 'Tidak diketahui',
                 'items' => $item->detailTransaksis->sum('jumlah'),
                 'total' => (float) $item->total_harga,
-                'payment' => 'Belum tersedia',
-                'status' => 'Selesai',
+
+                'payment' => match ($item->metode_pembayaran) {
+                    'tunai' => 'Tunai',
+                    'qris' => 'QRIS',
+                    'transfer' => 'Transfer',
+                    default => 'Belum tersedia',
+                },
+
+                'status' => match ($item->status) {
+                    'selesai' => 'Selesai',
+                    default => 'Belum tersedia',
+                },
             ];
         });
 

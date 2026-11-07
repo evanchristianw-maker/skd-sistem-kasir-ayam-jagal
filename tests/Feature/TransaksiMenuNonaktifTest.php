@@ -13,7 +13,6 @@ class TransaksiMenuNonaktifTest extends TestCase
 
     public function test_menu_nonaktif_ditolak_dalam_transaksi(): void
     {
-        // Membuat akun kasir khusus pengujian
         $kasir = User::create([
             'username' => 'kasir_test',
             'nama_lengkap' => 'Kasir Pengujian',
@@ -21,7 +20,6 @@ class TransaksiMenuNonaktifTest extends TestCase
             'role' => 'kasir',
         ]);
 
-        // Membuat menu nonaktif khusus pengujian
         $menu = Menu::create([
             'nama_menu' => 'Ayam Bakar Test',
             'kategori' => 'Makanan',
@@ -29,8 +27,9 @@ class TransaksiMenuNonaktifTest extends TestCase
             'status_menu' => false,
         ]);
 
-        // Mengirim transaksi menggunakan menu nonaktif
         $response = $this->actingAs($kasir)->postJson('/transaksi', [
+            'metode_pembayaran' => 'tunai',
+            'uang_dibayarkan' => 20000,
             'items' => [
                 [
                     'menu_id' => $menu->id,
@@ -39,21 +38,15 @@ class TransaksiMenuNonaktifTest extends TestCase
             ],
         ]);
 
-        // Memastikan transaksi ditolak
         $response->assertUnprocessable();
-
         $response->assertJsonValidationErrors('items');
 
-        // Memastikan tidak ada transaksi yang tersimpan
         $this->assertDatabaseCount('transaksis', 0);
-
-        // Memastikan tidak ada detail transaksi
         $this->assertDatabaseCount('detail_transaksis', 0);
     }
 
     public function test_menu_aktif_dapat_digunakan_dalam_transaksi(): void
     {
-        // Membuat akun kasir khusus pengujian
         $kasir = User::create([
             'username' => 'kasir_aktif_test',
             'nama_lengkap' => 'Kasir Pengujian Aktif',
@@ -61,7 +54,6 @@ class TransaksiMenuNonaktifTest extends TestCase
             'role' => 'kasir',
         ]);
 
-        // Membuat menu aktif khusus pengujian
         $menu = Menu::create([
             'nama_menu' => 'Ayam Geprek Test',
             'kategori' => 'Makanan',
@@ -69,8 +61,9 @@ class TransaksiMenuNonaktifTest extends TestCase
             'status_menu' => true,
         ]);
 
-        // Mengirim transaksi menggunakan menu aktif
         $response = $this->actingAs($kasir)->postJson('/transaksi', [
+            'metode_pembayaran' => 'tunai',
+            'uang_dibayarkan' => 30000,
             'items' => [
                 [
                     'menu_id' => $menu->id,
@@ -79,26 +72,28 @@ class TransaksiMenuNonaktifTest extends TestCase
             ],
         ]);
 
-        // Memastikan transaksi berhasil dibuat
         $response->assertCreated();
 
         $response->assertJson([
             'message' => 'Transaksi berhasil dibuat.',
+            'data' => [
+                'metode_pembayaran' => 'tunai',
+                'status' => 'selesai',
+            ],
         ]);
 
-        // Memastikan transaksi tersimpan
         $this->assertDatabaseCount('transaksis', 1);
-
-        // Memastikan detail transaksi tersimpan
         $this->assertDatabaseCount('detail_transaksis', 1);
 
-        // Memastikan total transaksi benar
         $this->assertDatabaseHas('transaksis', [
             'user_id' => $kasir->id,
             'total_harga' => 30000,
+            'metode_pembayaran' => 'tunai',
+            'uang_dibayarkan' => 30000,
+            'kembalian' => 0,
+            'status' => 'selesai',
         ]);
 
-        // Memastikan jumlah dan subtotal benar
         $this->assertDatabaseHas('detail_transaksis', [
             'menu_id' => $menu->id,
             'jumlah' => 2,

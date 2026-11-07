@@ -11,42 +11,53 @@ use Illuminate\Validation\ValidationException;
 
 class TransaksiController extends Controller
 {
-    
-public function store(Request $request)
-{
-        // 1. Validasi data pesanan
+    public function store(Request $request)
+    {
+        // 1. Validasi request
         $validated = $request->validate([
             'items' => ['required', 'array', 'min:1'],
-            'items.*.menu_id' => ['required', 'integer', 'exists:menus,id'],
-            'items.*.jumlah' => ['required', 'integer', 'min:1'],
+            'items.*.menu_id' => [
+                'required',
+                'integer',
+                'distinct',
+                'exists:menus,id',
+            ],
+            'items.*.jumlah' => [
+                'required',
+                'integer',
+                'min:1',
+            ],
+            'metode_pembayaran' => [
+                'required',
+                'string',
+                'in:tunai,qris,transfer',
+            ],
+            'uang_dibayarkan' => [
+                'required_if:metode_pembayaran,tunai',
+                'nullable',
+                'numeric',
+                'min:0',
+            ],
         ]);
 
-        // 2. Proses penyimpanan transaksi
+        // 2. Proses transaksi secara atomik
         $transaksi = DB::transaction(function () use ($validated, $request) {
 
             $totalHarga = 0;
+            $itemsTersimpan = [];
 
-            // Membuat nomor transaksi unik
-            $nomorTransaksi = 'TRX-' . now()->format('YmdHis') . '-' . strtoupper(Str::random(5));
-
-            // Membuat transaksi utama
-            $transaksi = Transaksi::create([
-                'nomor_transaksi' => $nomorTransaksi,
-                'user_id' => $request->user()->id,
-                'total_harga' => 0,
-            ]);
-
-            // 3. Menyimpan setiap menu yang dipesan
+            // 3. Ambil dan kunci menu, lalu hitung total
             foreach ($validated['items'] as $item) {
 
                 $menu = Menu::where('id', $item['menu_id'])
                     ->lockForUpdate()
                     ->first();
 
-                // Memastikan menu masih aktif
                 if (!$menu || !$menu->status_menu) {
                     throw ValidationException::withMessages([
-                        'items' => ['Salah satu menu tidak tersedia atau sudah dinonaktifkan.'],
+                        'items' => [
+                            'Salah satu menu tidak tersedia atau sudah dinonaktifkan.',
+                        ],
                     ]);
                 }
 
@@ -55,27 +66,96 @@ public function store(Request $request)
 
                 $totalHarga += $subtotal;
 
-                $transaksi->detailTransaksis()->create([
+                $itemsTersimpan[] = [
                     'menu_id' => $menu->id,
-                    'harga_satuan' => number_format($hargaSatuan / 100, 2, '.', ''),
+                    'harga_satuan' => $hargaSatuan,
                     'jumlah' => $item['jumlah'],
-                    'subtotal' => number_format($subtotal / 100, 2, '.', ''),
-                ]);
+                    'subtotal' => $subtotal,
+                ];
             }
 
-            // 4. Memperbarui total transaksi
-            $transaksi->update([
-                'total_harga' => number_format($totalHarga / 100, 2, '.', ''),
+            // 4. Tentukan nominal pembayaran
+            $metodePembayaran = $validated['metode_pembayaran'];
+
+            if ($metodePembayaran === 'tunai') {
+                $uangDibayarkan = (int) round(
+                    (float) $validated['uang_dibayarkan'] * 100
+                );
+
+                if ($uangDibayarkan < $totalHarga) {
+                    throw ValidationException::withMessages([
+                        'uang_dibayarkan' => [
+                            'Uang yang dibayarkan kurang dari total belanja.',
+                        ],
+                    ]);
+                }
+
+                $kembalian = $uangDibayarkan - $totalHarga;
+            } else {
+                // QRIS dan transfer dianggap sudah diverifikasi kasir.
+                $uangDibayarkan = $totalHarga;
+                $kembalian = 0;
+            }
+
+            // 5. Buat nomor transaksi
+            $nomorTransaksi = 'TRX-'
+                . now()->format('YmdHis')
+                . '-'
+                . strtoupper(Str::random(5));
+
+            // 6. Simpan header transaksi
+            $transaksi = Transaksi::create([
+                'nomor_transaksi' => $nomorTransaksi,
+                'user_id' => $request->user()->id,
+                'total_harga' => number_format(
+                    $totalHarga / 100,
+                    2,
+                    '.',
+                    ''
+                ),
+                'metode_pembayaran' => $metodePembayaran,
+                'uang_dibayarkan' => number_format(
+                    $uangDibayarkan / 100,
+                    2,
+                    '.',
+                    ''
+                ),
+                'kembalian' => number_format(
+                    $kembalian / 100,
+                    2,
+                    '.',
+                    ''
+                ),
+                'status' => 'selesai',
             ]);
+
+            // 7. Simpan detail transaksi
+            foreach ($itemsTersimpan as $item) {
+                $transaksi->detailTransaksis()->create([
+                    'menu_id' => $item['menu_id'],
+                    'harga_satuan' => number_format(
+                        $item['harga_satuan'] / 100,
+                        2,
+                        '.',
+                        ''
+                    ),
+                    'jumlah' => $item['jumlah'],
+                    'subtotal' => number_format(
+                        $item['subtotal'] / 100,
+                        2,
+                        '.',
+                        ''
+                    ),
+                ]);
+            }
 
             return $transaksi;
         });
 
-        // 5. Mengembalikan hasil transaksi dalam format JSON
+        // 8. Kembalikan hasil transaksi
         return response()->json([
             'message' => 'Transaksi berhasil dibuat.',
             'data' => $transaksi->load('detailTransaksis.menu'),
         ], 201);
     }
-
 }
