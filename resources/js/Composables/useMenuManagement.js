@@ -186,6 +186,11 @@ export default function useMenuManagement(initialMenus = []) {
 
             onError: (errors) => {
                 console.error("Gagal menghapus menu:", errors);
+
+                const message =
+                    errors.menu || "Menu gagal dihapus. Silakan coba lagi.";
+
+                window.alert(message);
             },
         });
     }

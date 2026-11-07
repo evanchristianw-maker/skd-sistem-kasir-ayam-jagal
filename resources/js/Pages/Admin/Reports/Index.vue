@@ -1,12 +1,12 @@
 ﻿<script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { router, usePage } from "@inertiajs/vue3";
 
-// SHARED DASHBOARD COMPONENTS
+// SHARED COMPONENTS
 import AdminHeader from "@/Components/Admin/Shared/AdminHeader.vue";
 import AdminLogoutModal from "@/Components/Admin/Shared/AdminLogoutModal.vue";
 
-// SALES REPORT COMPONENTS
+// SALES COMPONENTS
 import SalesFilter from "@/Components/Admin/Reports/Sales/SalesFilter.vue";
 import SalesSummary from "@/Components/Admin/Reports/Sales/SalesSummary.vue";
 
@@ -54,6 +54,7 @@ const logout = () => {
 
 // SALES REPORT MANAGEMENT
 const {
+    transactions,
     selectedPeriod,
     startDate,
     endDate,
@@ -64,27 +65,79 @@ const {
     formatDateIndonesia,
     setPeriod,
     resetFilter,
-} = useSalesReport();
+} = useSalesReport(
+    page.props.transactions ?? [],
+    page.props.filters ?? {}
+);
 
-// FILTER EVENTS
-const handlePeriodChange = (period) => {
-    setPeriod(period);
+// Memperbarui data ketika Laravel mengirim respons baru
+watch(
+    () => page.props.transactions,
+    (newTransactions) => {
+        transactions.value = newTransactions ?? [];
+    }
+);
+
+// Memperbarui filter ketika respons Laravel diterima
+watch(
+    () => page.props.filters,
+    (newFilters) => {
+        if (!newFilters) return;
+
+        selectedPeriod.value = newFilters.period || "all";
+        startDate.value = newFilters.start_date || "";
+        endDate.value = newFilters.end_date || "";
+    }
+);
+
+// MENGIRIM FILTER KE LARAVEL
+const applyFilter = () => {
+    router.get(
+        "/sales",
+        {
+            period: selectedPeriod.value,
+            start_date: startDate.value || null,
+            end_date: endDate.value || null,
+        },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            replace: true,
+        }
+    );
 };
 
+// PILIH PERIODE
+const handlePeriodChange = (period) => {
+    setPeriod(period);
+    applyFilter();
+};
+
+// UBAH TANGGAL MULAI
 const handleStartDateChange = (date) => {
     startDate.value = date;
     selectedPeriod.value = "custom";
+    applyFilter();
 };
 
+// UBAH TANGGAL AKHIR
 const handleEndDateChange = (date) => {
     endDate.value = date;
     selectedPeriod.value = "custom";
+    applyFilter();
+};
+
+// RESET FILTER
+const handleResetFilter = () => {
+    resetFilter();
+    applyFilter();
 };
 </script>
 
 <template>
     <div class="app-layout sales-report-page">
-        <!-- SHARED DASHBOARD HEADER -->
+
+        <!-- HEADER -->
         <AdminHeader
             :admin-name="adminName"
             :admin-email="adminEmail"
@@ -120,7 +173,7 @@ const handleEndDateChange = (date) => {
                     @change-period="handlePeriodChange"
                     @update:start-date="handleStartDateChange"
                     @update:end-date="handleEndDateChange"
-                    @reset="resetFilter"
+                    @reset="handleResetFilter"
                 />
 
                 <!-- SUMMARY -->
@@ -130,7 +183,7 @@ const handleEndDateChange = (date) => {
                     :format-number="formatNumber"
                 />
 
-                <!-- REPORT CONTENT -->
+                <!-- TRANSACTION HISTORY -->
                 <section class="sales-content-card">
                     <div class="sales-section-heading">
                         <div>
@@ -209,9 +262,9 @@ const handleEndDateChange = (date) => {
 
                 <!-- DATA INFORMATION -->
                 <p class="sales-data-note">
-                    Catatan: Data yang ditampilkan saat ini merupakan data
-                    simulasi untuk pengembangan frontend.
+                    Data laporan diambil langsung dari database sistem kasir.
                 </p>
+
             </div>
         </main>
 
@@ -221,6 +274,6 @@ const handleEndDateChange = (date) => {
             @cancel="cancelLogout"
             @confirm="logout"
         />
+
     </div>
 </template>
-

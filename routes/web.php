@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\MenuController;
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransaksiController;
+use App\Http\Controllers\LaporanPenjualanController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,11 +16,30 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Admin/Dashboard/Index');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// ==========================================
+// DASHBOARD BERDASARKAN ROLE
+// ==========================================
 
-Route::middleware('auth')->group(function () {
+Route::get('/dashboard', function () {
+    $user = auth()->user();
+
+    if ($user->role === 'admin') {
+        return Inertia::render('Admin/Dashboard/Index');
+    }
+
+    if ($user->role === 'kasir') {
+        return redirect()->route('cashier.transactions.index');
+    }
+
+    abort(403, 'Role pengguna tidak dikenali.');
+})->middleware('auth')->name('dashboard');
+
+
+// ==========================================
+// KHUSUS ADMIN
+// ==========================================
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
 
     // Manajemen Menu
     Route::get('/menu', [MenuController::class, 'index'])
@@ -38,19 +57,30 @@ Route::middleware('auth')->group(function () {
     Route::patch('/menu/{menu}/status', [MenuController::class, 'toggleStatus'])
         ->name('menu.toggleStatus');
 
-    // Transaksi
-    Route::post('/transaksi', [TransaksiController::class, 'store'])
-        ->name('transaksi.store');
+    // Laporan Penjualan
+    Route::get('/sales', [LaporanPenjualanController::class, 'index'])
+        ->name('sales.index');
 
-    // Profile
-    Route::get('/profile', [ProfileController::class, 'edit'])
-        ->name('profile.edit');
-
-    Route::patch('/profile', [ProfileController::class, 'update'])
-        ->name('profile.update');
-
-    Route::delete('/profile', [ProfileController::class, 'destroy'])
-        ->name('profile.destroy');
+    // Laporan Keuangan
+    Route::get('/finance', function () {
+        return Inertia::render('Admin/Finance/Index');
+    })->name('finance.index');
 });
 
+
+// ==========================================
+// KHUSUS KASIR
+// ==========================================
+
+Route::middleware(['auth', 'role:kasir'])->group(function () {
+
+    // Halaman Transaksi Kasir
+    Route::get('/cashier/transaksi', function () {
+        return Inertia::render('Cashier/Transactions/Index');
+    })->name('cashier.transactions.index');
+
+    // Menyimpan Transaksi
+    Route::post('/transaksi', [TransaksiController::class, 'store'])
+        ->name('transaksi.store');
+});
 require __DIR__.'/auth.php';
