@@ -1,7 +1,8 @@
-<script setup>
+﻿<script setup>
 import { Link } from "@inertiajs/vue3";
+import { computed } from "vue";
 
-defineProps({
+const props = defineProps({
     adminName: {
         type: String,
         default: "Administrator",
@@ -11,13 +12,19 @@ defineProps({
         default: "",
     },
 });
+
+const adminInitial = computed(() => {
+    const name = props.adminName?.trim();
+
+    return name ? name.charAt(0).toUpperCase() : "A";
+});
 </script>
 
 <template>
     <header class="app-header">
         <div class="header-container">
             <!-- Brand -->
-            <Link href="/dashboard" class="header-brand">
+            <Link href="/dashboard" class="header-brand" aria-label="Kembali ke Dashboard UMKM Ayam Jagal">
                 <div class="brand-logo">
                     <img
                         src="/assets/images/illustrations/ilustrasi-koki.png"
@@ -34,15 +41,15 @@ defineProps({
             <!-- Header Right -->
             <div class="header-right">
                 <!-- Date -->
-                <div class="header-date">
+                <div v-if="currentDate" class="header-date" aria-label="Tanggal saat ini">
                     <span class="date-dot"></span>
                     <span>{{ currentDate }}</span>
                 </div>
 
                 <!-- Administrator Profile -->
-                <div class="profile-button">
+                <div class="profile-button" aria-label="Profil administrator">
                     <div class="profile-avatar-small">
-                        {{ adminName.charAt(0).toUpperCase() }}
+                        {{ adminInitial }}
                     </div>
 
                     <div class="profile-header-text">
@@ -103,6 +110,12 @@ defineProps({
 
 .header-brand:hover {
     opacity: 0.85;
+}
+
+.header-brand:focus-visible {
+    outline: 3px solid rgba(202, 7, 8, 0.2);
+    outline-offset: 5px;
+    border-radius: 8px;
 }
 
 .brand-logo {
@@ -317,3 +330,5 @@ defineProps({
     }
 }
 </style>
+
+

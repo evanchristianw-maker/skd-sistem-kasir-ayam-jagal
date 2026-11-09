@@ -29,14 +29,15 @@ const periods = [
 </script>
 
 <template>
-    <section class="finance-filter">
+    <section class="finance-filter" aria-labelledby="finance-filter-title">
         <div class="finance-filter-heading">
             <div>
-                <h2>Filter Laporan</h2>
+                <h2 id="finance-filter-title">Filter Laporan</h2>
                 <p>Atur periode untuk melihat laporan keuangan.</p>
             </div>
 
-            <button type="button" class="finance-reset-button" @click="emit('reset')">
+            <button type="button" class="finance-reset-button"
+                aria-label="Reset semua filter laporan keuangan" @click="emit('reset')">
                 Reset Filter
             </button>
         </div>
@@ -48,6 +49,7 @@ const periods = [
                 type="button"
                 class="finance-period-button"
                 :class="{ active: selectedPeriod === period.value }"
+                :aria-pressed="selectedPeriod === period.value"
                 @click="emit('change-period', period.value)"
             >
                 {{ period.label }}
@@ -81,3 +83,34 @@ const periods = [
         </div>
     </section>
 </template>
+
+<style scoped>
+.finance-filter {
+    animation: financeFilterFadeUp 0.5s ease both;
+}
+
+.finance-reset-button:focus-visible,
+.finance-period-button:focus-visible,
+.finance-date-field input:focus-visible {
+    outline: 3px solid rgba(202, 7, 8, 0.25);
+    outline-offset: 3px;
+}
+
+@keyframes financeFilterFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .finance-filter {
+        animation: none;
+    }
+}
+</style>

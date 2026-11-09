@@ -2,6 +2,9 @@
 const searchQuery = defineModel("searchQuery");
 const selectedCategory = defineModel("selectedCategory");
 
+const isMenuActive = (status) =>
+    status === true || status === 1 || status === "1";
+
 defineProps({
     filteredMenus: {
         type: Array,
@@ -63,6 +66,7 @@ const emit = defineEmits(["edit", "delete", "toggleStatus"]);
                     :key="category"
                     type="button"
                     :class="{ active: selectedCategory === category }"
+                    :aria-pressed="selectedCategory === category"
                     @click="selectedCategory = category"
                 >
                     {{ category }}
@@ -72,13 +76,17 @@ const emit = defineEmits(["edit", "delete", "toggleStatus"]);
 
         <div class="table-wrapper">
             <table>
+                <caption class="sr-only">
+                    Daftar menu UMKM Ayam Jagal beserta kategori, harga,
+                    status, dan tindakan pengelolaan.
+                </caption>
                 <thead>
                     <tr>
-                        <th>MENU</th>
-                        <th>KATEGORI</th>
-                        <th>HARGA</th>
-                        <th>STATUS</th>
-                        <th class="action-heading">AKSI</th>
+                        <th scope="col">MENU</th>
+                        <th scope="col">KATEGORI</th>
+                        <th scope="col">HARGA</th>
+                        <th scope="col">STATUS</th>
+                        <th scope="col" class="action-heading">AKSI</th>
                     </tr>
                 </thead>
 
@@ -146,8 +154,8 @@ const emit = defineEmits(["edit", "delete", "toggleStatus"]);
                             <button
                                 type="button"
                                 class="toggle-switch"
-                                :class="{ 'is-active': menu.status }"
-                                :aria-pressed="Boolean(menu.status)"
+                                :class="{ 'is-active': isMenuActive(menu.status) }"
+                                :aria-pressed="isMenuActive(menu.status)"
                                 :aria-label="
                                     menu.status
                                         ? `Nonaktifkan ${menu.name}`
@@ -160,7 +168,7 @@ const emit = defineEmits(["edit", "delete", "toggleStatus"]);
                                 </span>
 
                                 <span class="toggle-label">
-                                    {{ menu.status ? "Aktif" : "Tidak Aktif" }}
+                                    {{ isMenuActive(menu.status) ? "Aktif" : "Tidak Aktif" }}
                                 </span>
                             </button>
                         </td>
@@ -172,7 +180,7 @@ const emit = defineEmits(["edit", "delete", "toggleStatus"]);
                                     type="button"
                                     class="icon-button edit-button"
                                     title="Edit menu"
-                                    aria-label="Edit menu"
+                                    :aria-label="`Edit menu ${menu.name}`"
                                     @click="emit('edit', menu)"
                                 >
                                     <svg
@@ -199,7 +207,7 @@ const emit = defineEmits(["edit", "delete", "toggleStatus"]);
                                     type="button"
                                     class="icon-button delete-button"
                                     title="Hapus menu"
-                                    aria-label="Hapus menu"
+                                    :aria-label="`Hapus menu ${menu.name}`"
                                     @click="emit('delete', menu)"
                                 >
                                     <svg
@@ -238,7 +246,7 @@ const emit = defineEmits(["edit", "delete", "toggleStatus"]);
                     </tr>
 
                     <!-- Menu kosong -->
-                    <tr v-if="filteredMenus.length === 0">
+                    <tr v-if="filteredMenus.length === 0" class="empty-row">
                         <td colspan="5">
                             <div class="empty-state">
                                 <div class="empty-icon">
@@ -657,8 +665,10 @@ tbody tr:last-child td {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    width: 100%;
     min-height: 230px;
     padding: 30px 15px;
+    box-sizing: border-box;
     text-align: center;
 }
 
@@ -666,9 +676,10 @@ tbody tr:last-child td {
     display: flex;
     align-items: center;
     justify-content: center;
+    align-self: center;
     width: 58px;
     height: 58px;
-    margin-bottom: 15px;
+    margin: 0 auto 15px;
     color: #ca0708;
     background: #fff0f0;
     border-radius: 16px;
@@ -870,15 +881,15 @@ tbody tr:last-child td {
         height: 34px;
     }
 
-    tbody tr:has(.empty-state) {
+    tbody tr.empty-row {
         display: block;
     }
 
-    tbody tr:has(.empty-state) td {
+    tbody tr.empty-row td {
         display: block;
     }
 
-    tbody tr:has(.empty-state) td::before {
+    tbody tr.empty-row td::before {
         display: none;
     }
 }
@@ -922,41 +933,36 @@ tbody tr:last-child td {
     }
 }
 
-/* EMPTY STATE ALIGNMENT FIX */
-.empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    min-height: 230px;
-    padding: 30px 15px;
-    text-align: center;
+
+/* ACCESSIBILITY */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
-.empty-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    align-self: center;
-    width: 58px;
-    height: 58px;
-    flex-shrink: 0;
-    margin: 0 auto 15px;
+.category-filter button:focus-visible,
+.toggle-switch:focus-visible,
+.icon-button:focus-visible {
+    outline: 3px solid rgba(202, 7, 8, 0.2);
+    outline-offset: 3px;
 }
 
-.empty-icon svg {
-    display: block;
-    width: 27px;
-    height: 27px;
-}
-
-.empty-state strong,
-.empty-state p {
-    width: 100%;
+/* EMPTY ROW */
+tbody tr.empty-row td {
     text-align: center;
 }
 
 </style>
+
+
+
+
 
 

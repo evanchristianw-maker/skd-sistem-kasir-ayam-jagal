@@ -127,12 +127,12 @@ const handleResetFilter = () => {
         />
 
         <!-- MAIN CONTENT -->
-        <main class="finance-main-content">
+        <main class="finance-main-content" aria-labelledby="finance-page-title">
             <div class="finance-container">
 
                 <!-- PAGE HEADING -->
                 <section class="finance-page-heading">
-                    <h1>Laporan Keuangan</h1>
+                    <h1 id="finance-page-title">Laporan Keuangan</h1>
                     <p>
                         Pantau pemasukan, pengeluaran, dan keuntungan
                         UMKM Ayam Jagal secara terstruktur.
@@ -161,8 +161,10 @@ const handleResetFilter = () => {
                 <section
                     v-if="!hasFinanceData"
                     class="finance-data-notice"
+                    role="status"
+                    aria-live="polite"
                 >
-                    <div class="finance-notice-icon">
+                    <div class="finance-notice-icon" aria-hidden="true">
                         <svg viewBox="0 0 24 24" fill="none">
                             <circle
                                 cx="12"
@@ -284,3 +286,4 @@ const handleResetFilter = () => {
     }
 }
 </style>
+

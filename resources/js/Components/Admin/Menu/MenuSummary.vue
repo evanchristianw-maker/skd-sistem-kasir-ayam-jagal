@@ -42,13 +42,13 @@ const summaryCards = computed(() => [
 </script>
 
 <template>
-    <section class="summary-section">
+    <section class="summary-section" aria-labelledby="menu-summary-title">
         <div class="section-heading">
-            <h3>Ringkasan Menu</h3>
+            <h3 id="menu-summary-title">Ringkasan Menu</h3>
             
         </div>
 
-        <div class="summary-grid">
+        <div class="summary-grid" aria-live="polite" aria-atomic="false">
             <article
                 v-for="(card, index) in summaryCards"
                 :key="card.title"
@@ -165,11 +165,6 @@ const summaryCards = computed(() => [
     font-size: 21px;
     font-weight: 800;
     letter-spacing: -0.4px;
-}
-
-.section-heading > span {
-    color: #777e89;
-    font-size: 13px;
 }
 
 /* SUMMARY GRID */
@@ -356,10 +351,7 @@ const summaryCards = computed(() => [
         font-size: 17px;
     }
 
-    .section-heading > span {
-        font-size: 11px;
     }
-}
 
 /* SMALL MOBILE */
 @media (max-width: 350px) {
@@ -392,5 +384,6 @@ const summaryCards = computed(() => [
     }
 }
 </style>
+
 
 

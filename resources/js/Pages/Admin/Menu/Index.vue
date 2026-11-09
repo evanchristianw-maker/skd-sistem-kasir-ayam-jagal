@@ -89,13 +89,13 @@ const {
         />
 
         <!-- MAIN CONTENT -->
-        <main class="main-content">
+        <main class="main-content" aria-labelledby="menu-page-title">
             <div class="menu-container">
                 <!-- PAGE HEADING -->
                 <section class="page-heading">
                     <div class="page-heading-content">
 
-                        <h1>Kelola Menu &amp; Harga</h1>
+                        <h1 id="menu-page-title">Kelola Menu &amp; Harga</h1>
 
                         <p>
                             Atur daftar makanan, minuman, kategori, dan harga
@@ -106,6 +106,7 @@ const {
                     <button
                         type="button"
                         class="primary-button"
+                        aria-label="Tambah menu baru"
                         @click="openAddModal"
                     >
                         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -231,15 +232,6 @@ const {
     min-width: 0;
 }
 
-.eyebrow {
-    display: inline-block;
-    margin-bottom: 9px;
-    color: var(--primary);
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 1.2px;
-}
-
 .page-heading h1 {
     margin: 0;
     color: var(--text-primary);
@@ -279,6 +271,11 @@ const {
     background: var(--primary-dark);
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(202, 7, 8, 0.18);
+}
+
+.primary-button:focus-visible {
+    outline: 3px solid rgba(202, 7, 8, 0.2);
+    outline-offset: 3px;
 }
 
 .primary-button:active {
@@ -395,6 +392,8 @@ const {
     }
 }
 </style>
+
+
 
 
 
