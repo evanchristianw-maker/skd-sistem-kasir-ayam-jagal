@@ -12,27 +12,27 @@ defineProps({
 </script>
 
 <template>
-    <section class="finance-transactions">
+    <section class="finance-transactions" aria-labelledby="finance-transactions-title">
         <div class="finance-section-heading">
             <div>
-                <h2>Riwayat Transaksi Keuangan</h2>
+                <h2 id="finance-transactions-title">Riwayat Transaksi Keuangan</h2>
                 <p>Daftar aktivitas keuangan berdasarkan periode yang dipilih.</p>
             </div>
 
-            <span class="finance-transaction-count">
+            <span class="finance-transaction-count" aria-live="polite" aria-atomic="true">
                 {{ transactions.length }} transaksi
             </span>
         </div>
 
         <div v-if="transactions.length" class="finance-table-wrapper">
-            <table class="finance-table">
+            <table class="finance-table" aria-label="Daftar riwayat transaksi keuangan">
                 <thead>
                     <tr>
-                        <th>Tanggal</th>
-                        <th>Keterangan</th>
-                        <th>Kategori</th>
-                        <th>Jenis</th>
-                        <th>Jumlah</th>
+                        <th scope="col">Tanggal</th>
+                        <th scope="col">Keterangan</th>
+                        <th scope="col">Kategori</th>
+                        <th scope="col">Jenis</th>
+                        <th scope="col">Jumlah</th>
                     </tr>
                 </thead>
 
@@ -54,8 +54,8 @@ defineProps({
             </table>
         </div>
 
-        <div v-else class="finance-empty-state">
-            <div class="finance-empty-icon">
+        <div v-else class="finance-empty-state" role="status" aria-live="polite">
+            <div class="finance-empty-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
                     <rect x="4" y="3" width="16" height="18" rx="2"
                         stroke="currentColor" stroke-width="1.7"/>
@@ -69,3 +69,4 @@ defineProps({
         </div>
     </section>
 </template>
+

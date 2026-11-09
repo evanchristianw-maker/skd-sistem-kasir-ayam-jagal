@@ -1,5 +1,6 @@
-<script setup>
-defineProps({
+﻿<script setup>
+import { ref, watch, nextTick, onBeforeUnmount } from "vue";
+const props = defineProps({
     showModal: {
         type: Boolean,
         default: false,
@@ -26,7 +27,67 @@ defineProps({
     },
 });
 
-defineEmits(["close"]);
+const emit = defineEmits(["close"]);
+
+const modalRef = ref(null);
+const previousActiveElement = ref(null);
+
+const closeModal = () => emit("close");
+
+const handleKeydown = (event) => {
+    if (!props.showModal) return;
+
+    if (event.key === "Escape") {
+        event.preventDefault();
+        closeModal();
+        return;
+    }
+
+    if (event.key !== "Tab") return;
+
+    const elements = modalRef.value?.querySelectorAll(
+        'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex]:not([tabindex="-1"])'
+    );
+
+    if (!elements?.length) return;
+
+    const first = elements[0];
+    const last = elements[elements.length - 1];
+
+    if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+    }
+};
+
+watch(
+    () => props.showModal,
+    async (isOpen) => {
+        if (isOpen) {
+            previousActiveElement.value = document.activeElement;
+
+            await nextTick();
+
+            modalRef.value?.querySelector("#menu-name")?.focus();
+
+            document.addEventListener("keydown", handleKeydown);
+        } else {
+            document.removeEventListener("keydown", handleKeydown);
+
+            await nextTick();
+
+            previousActiveElement.value?.focus?.();
+            previousActiveElement.value = null;
+        }
+    }
+);
+
+onBeforeUnmount(() => {
+    document.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 <template>
@@ -34,20 +95,21 @@ defineEmits(["close"]);
         <div
             v-if="showModal"
             class="modal-overlay"
-            @click.self="$emit('close')"
+            @click.self="closeModal"
         >
             <section
+                ref="modalRef"
                 class="modal-card"
                 role="dialog"
                 aria-modal="true"
-                :aria-label="isEditing ? 'Edit menu' : 'Tambah menu baru'"
+                aria-labelledby="menu-form-title"
             >
                 <!-- Header -->
                 <div class="modal-header">
                     <div>
                         <span class="eyebrow">DATA PRODUK</span>
 
-                        <h2>
+                        <h2 id="menu-form-title">
                             {{ isEditing ? "Edit Menu" : "Tambah Menu Baru" }}
                         </h2>
 
@@ -58,7 +120,7 @@ defineEmits(["close"]);
                         type="button"
                         class="close-button"
                         aria-label="Tutup"
-                        @click="$emit('close')"
+                        @click="closeModal"
                     >
                         <svg viewBox="0 0 24 24" fill="none">
                             <path
@@ -180,7 +242,7 @@ defineEmits(["close"]);
                         <button
                             type="button"
                             class="secondary-button"
-                            @click="$emit('close')"
+                            @click="closeModal"
                         >
                             Batal
                         </button>
@@ -273,6 +335,11 @@ defineEmits(["close"]);
     background: #fff0f0;
 }
 
+.close-button:focus-visible {
+    outline: 3px solid rgba(202, 7, 8, 0.2);
+    outline-offset: 3px;
+}
+
 .close-button svg {
     width: 19px;
     height: 19px;
@@ -341,7 +408,21 @@ defineEmits(["close"]);
 
 /* Image upload */
 .file-input {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.form-group:has(.file-input:focus-visible) .upload-area {
+    outline: 3px solid rgba(202, 7, 8, 0.2);
+    outline-offset: 3px;
+    border-color: #ca0708;
 }
 
 .upload-area {
@@ -534,3 +615,6 @@ defineEmits(["close"]);
     }
 }
 </style>
+
+
+

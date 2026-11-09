@@ -202,7 +202,7 @@ onBeforeUnmount(() => {
 
                         <div class="dropdown-user-info">
                             <strong>{{ adminName }}</strong>
-                            <span>{{ adminEmail }}</span>
+                            <span v-if="adminEmail && adminEmail !== '-'">{{ adminEmail }}</span>
                         </div>
                     </div>
 
@@ -692,5 +692,6 @@ onBeforeUnmount(() => {
     }
 }
 </style>
+
 
 

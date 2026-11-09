@@ -159,6 +159,23 @@ defineProps({
     transition:
         transform 0.2s ease,
         box-shadow 0.2s ease;
+    animation: dashboardCardEnter 0.55s ease both;
+}
+
+.summary-card:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.summary-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.summary-card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.summary-card:nth-child(4) {
+    animation-delay: 0.3s;
 }
 
 .summary-card:hover {
@@ -227,6 +244,18 @@ defineProps({
     font-size: 11px;
     font-weight: 500;
     line-height: 1.4;
+}
+
+@keyframes dashboardCardEnter {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* COLOR VARIANTS */
@@ -338,4 +367,6 @@ defineProps({
     }
 }
 </style>
+
+
 

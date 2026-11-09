@@ -12,22 +12,22 @@ defineProps({
 </script>
 
 <template>
-    <section class="finance-breakdown">
+    <section class="finance-breakdown" aria-labelledby="finance-breakdown-title">
         <div class="finance-section-heading">
             <div>
-                <h2>Rincian Keuangan</h2>
+                <h2 id="finance-breakdown-title">Rincian Keuangan</h2>
                 <p>Ringkasan pemasukan dan pengeluaran berdasarkan kategori.</p>
             </div>
         </div>
 
-        <div v-if="breakdown.length" class="finance-breakdown-list">
+        <div v-if="breakdown.length" class="finance-breakdown-list" aria-live="polite" aria-atomic="false">
             <article
                 v-for="(item, index) in breakdown"
                 :key="item.id ?? index"
                 class="finance-breakdown-item"
             >
                 <div class="finance-breakdown-info">
-                    <span class="finance-breakdown-dot" :class="item.type"></span>
+                    <span class="finance-breakdown-dot" :class="item.type" aria-hidden="true"></span>
                     <div>
                         <strong>{{ item.category }}</strong>
                         <small>{{ item.type === 'income' ? 'Pemasukan' : 'Pengeluaran' }}</small>
@@ -40,8 +40,8 @@ defineProps({
             </article>
         </div>
 
-        <div v-else class="finance-empty-state">
-            <div class="finance-empty-icon">
+        <div v-else class="finance-empty-state" role="status" aria-live="polite">
+            <div class="finance-empty-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
                     <rect x="4" y="3" width="16" height="18" rx="2"
                         stroke="currentColor" stroke-width="1.7"/>
@@ -55,3 +55,34 @@ defineProps({
         </div>
     </section>
 </template>
+
+<style scoped>
+.finance-breakdown-item {
+    animation: financeBreakdownEnter 0.45s ease both;
+    animation-delay: calc(var(--item-index, 0) * 0.07s);
+}
+
+.finance-breakdown-item:focus-visible {
+    outline: 3px solid rgba(202, 7, 8, 0.2);
+    outline-offset: 3px;
+}
+
+@keyframes financeBreakdownEnter {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .finance-breakdown-item {
+        animation: none;
+        transition: none;
+    }
+}
+</style>

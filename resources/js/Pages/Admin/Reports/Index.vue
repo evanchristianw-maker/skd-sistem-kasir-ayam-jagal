@@ -147,14 +147,14 @@ const handleResetFilter = () => {
         />
 
         <!-- MAIN CONTENT -->
-        <main class="main-content">
+        <main class="main-content" aria-labelledby="sales-page-title">
             <div class="sales-container">
 
                 <!-- PAGE HEADING -->
                 <section class="sales-page-heading">
                     <div>
 
-                        <h1>Laporan Penjualan</h1>
+                        <h1 id="sales-page-title">Laporan Penjualan</h1>
 
                         <p>
                             Pantau performa penjualan dan aktivitas transaksi
@@ -180,20 +180,18 @@ const handleResetFilter = () => {
                     :format-rupiah="formatRupiah"
                     :format-number="formatNumber"
                 />
-
                 <!-- TRANSACTION HISTORY -->
-                                <!-- TRANSACTION HISTORY -->
-                <section class="sales-content-card">
+                <section class="sales-content-card" aria-labelledby="sales-history-title">
                     <div class="sales-section-heading">
                         <div>
-                            <h2>Riwayat Transaksi Penjualan</h2>
+                            <h2 id="sales-history-title">Riwayat Transaksi Penjualan</h2>
                             <p>
                                 Daftar transaksi berdasarkan periode yang
                                 dipilih.
                             </p>
                         </div>
 
-                        <span class="sales-transaction-count">
+                        <span class="sales-transaction-count" aria-live="polite" aria-atomic="true">
                             {{ filteredTransactions.length }} transaksi
                         </span>
                     </div>
@@ -204,15 +202,16 @@ const handleResetFilter = () => {
                         class="sales-table-wrapper"
                     >
                         <table class="sales-table">
+                            <caption class="sr-only">Daftar riwayat transaksi penjualan</caption>
                             <thead>
                                 <tr>
-                                    <th>ID Transaksi</th>
-                                    <th>Tanggal</th>
-                                    <th>Kasir</th>
-                                    <th>Jumlah Item</th>
-                                    <th>Metode Pembayaran</th>
-                                    <th>Total</th>
-                                    <th>Status</th>
+                                    <th scope="col">ID Transaksi</th>
+                                    <th scope="col">Tanggal</th>
+                                    <th scope="col">Kasir</th>
+                                    <th scope="col">Jumlah Item</th>
+                                    <th scope="col">Metode Pembayaran</th>
+                                    <th scope="col">Total</th>
+                                    <th scope="col">Status</th>
                                 </tr>
                             </thead>
 
@@ -257,7 +256,7 @@ const handleResetFilter = () => {
                     </div>
 
                     <!-- EMPTY STATE -->
-                    <div v-else class="sales-empty-state">
+                    <div v-else class="sales-empty-state" role="status" aria-live="polite">
                         <div class="sales-empty-icon">
                             <svg viewBox="0 0 24 24" fill="none">
                                 <rect
@@ -312,6 +311,8 @@ const handleResetFilter = () => {
 
     </div>
 </template>
+
+
 
 
 

@@ -43,7 +43,7 @@ const cards = [
 </script>
 
 <template>
-    <section class="sales-summary">
+    <section class="sales-summary" aria-label="Ringkasan laporan penjualan" aria-live="polite">
         <article
             v-for="card in cards"
             :key="card.key"
@@ -54,7 +54,7 @@ const cards = [
                     {{ card.label }}
                 </span>
 
-                <div class="summary-card-icon" :class="`icon-${card.icon}`">
+                <div class="summary-card-icon" :class="`icon-${card.icon}`" aria-hidden="true">
                     <svg
                         v-if="card.icon === 'sales' || card.icon === 'average'"
                         viewBox="0 0 24 24"
@@ -106,3 +106,43 @@ const cards = [
 
 
 
+
+<style scoped>
+.sales-summary-card {
+    animation: salesSummaryFadeUp 0.5s ease both;
+}
+
+.sales-summary-card:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.sales-summary-card:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.sales-summary-card:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.sales-summary-card:nth-child(4) {
+    animation-delay: 0.3s;
+}
+
+@keyframes salesSummaryFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sales-summary-card {
+        animation: none;
+    }
+}
+</style>

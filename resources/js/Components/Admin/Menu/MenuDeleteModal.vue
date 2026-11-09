@@ -1,5 +1,7 @@
-<script setup>
-defineProps({
+﻿<script setup>
+import { ref, watch, nextTick, onBeforeUnmount } from "vue";
+
+const props = defineProps({
     showDeleteModal: {
         type: Boolean,
         default: false,
@@ -10,7 +12,75 @@ defineProps({
     },
 });
 
-defineEmits(["close"]);
+const emit = defineEmits(["close"]);
+
+const modalRef = ref(null);
+const previousActiveElement = ref(null);
+
+const closeModal = () => {
+    emit("close");
+};
+
+const handleKeydown = (event) => {
+    if (!props.showDeleteModal) return;
+
+    if (event.key === "Escape") {
+        event.preventDefault();
+        closeModal();
+        return;
+    }
+
+    if (event.key === "Tab") {
+        const focusableElements = modalRef.value?.querySelectorAll(
+            'button:not(:disabled), [href], input:not(:disabled), [tabindex]:not([tabindex="-1"])',
+        );
+
+        if (!focusableElements?.length) return;
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (
+            event.shiftKey &&
+            document.activeElement === firstElement
+        ) {
+            event.preventDefault();
+            lastElement.focus();
+        } else if (
+            !event.shiftKey &&
+            document.activeElement === lastElement
+        ) {
+            event.preventDefault();
+            firstElement.focus();
+        }
+    }
+};
+
+watch(
+    () => props.showDeleteModal,
+    async (isOpen) => {
+        if (isOpen) {
+            previousActiveElement.value = document.activeElement;
+
+            await nextTick();
+
+            modalRef.value?.querySelector(".secondary-button")?.focus();
+
+            document.addEventListener("keydown", handleKeydown);
+        } else {
+            document.removeEventListener("keydown", handleKeydown);
+
+            await nextTick();
+
+            previousActiveElement.value?.focus?.();
+            previousActiveElement.value = null;
+        }
+    },
+);
+
+onBeforeUnmount(() => {
+    document.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 <template>
@@ -18,16 +88,18 @@ defineEmits(["close"]);
         <div
             v-if="showDeleteModal"
             class="modal-overlay"
-            @click.self="$emit('close')"
+            @click.self="closeModal"
         >
             <section
+                ref="modalRef"
                 class="delete-modal"
                 role="alertdialog"
                 aria-modal="true"
                 aria-labelledby="delete-title"
                 aria-describedby="delete-description"
+                tabindex="-1"
             >
-                <div class="delete-icon">
+                <div class="delete-icon" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none">
                         <path
                             d="M3 6H21M8 6V4H16V6M19 6L18 20H6L5 6M10 11V16M14 11V16"
@@ -50,7 +122,7 @@ defineEmits(["close"]);
                     <button
                         type="button"
                         class="secondary-button"
-                        @click="$emit('close')"
+                        @click="closeModal"
                     >
                         Batal
                     </button>
@@ -175,7 +247,6 @@ defineEmits(["close"]);
     outline-offset: 3px;
 }
 
-/* Animasi modal */
 .delete-modal-enter-active,
 .delete-modal-leave-active {
     transition: opacity 0.2s ease;
@@ -202,7 +273,6 @@ defineEmits(["close"]);
     }
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .delete-modal {
         max-width: 360px;

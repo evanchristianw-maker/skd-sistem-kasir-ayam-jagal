@@ -37,16 +37,17 @@ const updateEndDate = (event) => {
 </script>
 
 <template>
-    <section class="sales-filter">
+    <section class="sales-filter" aria-labelledby="sales-filter-title">
         <div class="filter-heading">
             <div>
-                <h2>Filter Laporan</h2>
+                <h2 id="sales-filter-title">Filter Laporan</h2>
                 <p>Atur periode untuk melihat data penjualan.</p>
             </div>
 
             <button
                 type="button"
                 class="reset-button"
+                aria-label="Reset semua filter laporan"
                 @click="emit('reset')"
             >
                 Reset Filter
@@ -60,6 +61,7 @@ const updateEndDate = (event) => {
                 type="button"
                 class="period-button"
                 :class="{ active: selectedPeriod === period.value }"
+                :aria-pressed="selectedPeriod === period.value"
                 @click="emit('change-period', period.value)"
             >
                 {{ period.label }}
@@ -93,3 +95,34 @@ const updateEndDate = (event) => {
         </div>
     </section>
 </template>
+
+<style scoped>
+.sales-filter {
+    animation: salesFilterFadeUp 0.5s ease both;
+}
+
+.reset-button:focus-visible,
+.period-button:focus-visible,
+.date-field input:focus-visible {
+    outline: 3px solid rgba(202, 7, 8, 0.2);
+    outline-offset: 3px;
+}
+
+@keyframes salesFilterFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sales-filter {
+        animation: none;
+    }
+}
+</style>
