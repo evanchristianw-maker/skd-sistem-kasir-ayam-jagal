@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 const searchQuery = defineModel("searchQuery");
 const selectedCategory = defineModel("selectedCategory");
 
@@ -278,16 +278,23 @@ const emit = defineEmits(["edit", "delete", "toggleStatus"]);
 </template>
 
 <style scoped>
-.menu-panel {
-    width: 100%;
-    margin-top: 30px;
-    padding: 26px;
-    background: #fff;
-    border: 1px solid #ededed;
-    border-radius: 17px;
-    box-shadow: 0 4px 15px rgba(20, 20, 20, 0.035);
+* {
+    box-sizing: border-box;
 }
 
+/* PANEL */
+.menu-panel {
+    width: 100%;
+    margin-top: 28px;
+    padding: 26px;
+    background: #ffffff;
+    border: 1px solid #eceef1;
+    border-radius: 16px;
+    box-shadow: 0 3px 12px rgba(20, 25, 35, 0.035);
+    animation: menuTableFadeUp 0.5s ease both;
+}
+
+/* HEADING */
 .panel-heading {
     display: flex;
     align-items: center;
@@ -301,10 +308,11 @@ const emit = defineEmits(["edit", "delete", "toggleStatus"]);
     color: #202124;
     font-size: 21px;
     font-weight: 800;
+    letter-spacing: -0.4px;
 }
 
 .panel-heading p {
-    margin: 6px 0 0;
+    margin: 7px 0 0;
     color: #777e89;
     font-size: 13px;
     line-height: 1.6;
@@ -320,6 +328,7 @@ const emit = defineEmits(["edit", "delete", "toggleStatus"]);
     font-weight: 700;
 }
 
+/* TOOLBAR */
 .toolbar {
     display: flex;
     align-items: center;
@@ -336,9 +345,10 @@ const emit = defineEmits(["edit", "delete", "toggleStatus"]);
     max-width: 310px;
     min-height: 43px;
     padding: 0 13px;
-    background: #fff;
+    background: #ffffff;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .search-box:focus-within {
@@ -365,6 +375,10 @@ const emit = defineEmits(["edit", "delete", "toggleStatus"]);
     font-size: 13px;
 }
 
+.search-box input::placeholder {
+    color: #a0a5ae;
+}
+
 .category-filter {
     display: flex;
     align-items: center;
@@ -376,25 +390,32 @@ const emit = defineEmits(["edit", "delete", "toggleStatus"]);
     min-height: 36px;
     padding: 0 13px;
     color: #626875;
-    background: #fff;
+    background: #ffffff;
     border: 1px solid #e8e8e8;
     border-radius: 8px;
     font-family: inherit;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
+    transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.category-filter button:hover {
+    color: #ca0708;
+    border-color: #ca0708;
 }
 
 .category-filter button.active {
-    color: #fff;
+    color: #ffffff;
     background: #ca0708;
     border-color: #ca0708;
 }
 
+/* TABLE */
 .table-wrapper {
     width: 100%;
     overflow-x: auto;
-    border: 1px solid #eee;
+    border: 1px solid #eceef1;
     border-radius: 12px;
 }
 
@@ -406,13 +427,13 @@ table {
 }
 
 thead {
-    background: #f9fafb;
+    background: #f8f9fb;
 }
 
 th {
     padding: 15px 16px;
     color: #777e89;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid #eceef1;
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.5px;
@@ -427,6 +448,14 @@ td {
     vertical-align: middle;
 }
 
+tbody tr {
+    transition: background 0.2s ease;
+}
+
+tbody tr:hover:not(:last-child) {
+    background: #fcfcfd;
+}
+
 tbody tr:last-child td {
     border-bottom: none;
 }
@@ -435,6 +464,7 @@ tbody tr:last-child td {
     text-align: center;
 }
 
+/* MENU INFORMATION */
 .menu-info {
     display: flex;
     align-items: center;
@@ -488,6 +518,7 @@ tbody tr:last-child td {
     white-space: nowrap;
 }
 
+/* CATEGORY */
 .category-badge {
     display: inline-flex;
     align-items: center;
@@ -500,6 +531,7 @@ tbody tr:last-child td {
     white-space: nowrap;
 }
 
+/* PRICE */
 .price {
     color: #202124;
     font-size: 13px;
@@ -507,7 +539,7 @@ tbody tr:last-child td {
     white-space: nowrap;
 }
 
-/* Toggle Status */
+/* STATUS TOGGLE */
 .toggle-switch {
     display: inline-flex;
     align-items: center;
@@ -524,7 +556,7 @@ tbody tr:last-child td {
     font-size: 11px;
     font-weight: 700;
     cursor: pointer;
-    transition: 0.2s ease;
+    transition: background 0.2s ease, border-color 0.2s ease;
 }
 
 .toggle-track {
@@ -543,7 +575,7 @@ tbody tr:last-child td {
     left: 2px;
     width: 12px;
     height: 12px;
-    background: #fff;
+    background: #ffffff;
     border-radius: 50%;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     transition: transform 0.2s ease;
@@ -563,7 +595,7 @@ tbody tr:last-child td {
     transform: translateX(13px);
 }
 
-/* Tombol Edit dan Hapus */
+/* ACTION BUTTONS */
 .action-buttons {
     display: flex;
     align-items: center;
@@ -581,7 +613,7 @@ tbody tr:last-child td {
     border: none;
     border-radius: 9px;
     cursor: pointer;
-    transition: 0.2s ease;
+    transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .icon-button:hover {
@@ -598,18 +630,28 @@ tbody tr:last-child td {
     background: #eff6ff;
 }
 
+.edit-button:hover {
+    background: #dbeafe;
+}
+
 .delete-button {
     color: #ca0708;
     background: #fff0f0;
 }
 
+.delete-button:hover {
+    background: #ffe0e0;
+}
+
+/* FOCUS */
 .toggle-switch:focus-visible,
-.icon-button:focus-visible {
+.icon-button:focus-visible,
+.category-filter button:focus-visible {
     outline: 3px solid rgba(202, 7, 8, 0.2);
     outline-offset: 2px;
 }
 
-/* Empty State */
+/* EMPTY STATE */
 .empty-state {
     display: flex;
     flex-direction: column;
@@ -650,7 +692,20 @@ tbody tr:last-child td {
     line-height: 1.6;
 }
 
-/* Tablet */
+/* ANIMATION */
+@keyframes menuTableFadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(13px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* TABLET */
 @media (max-width: 900px) {
     .menu-panel {
         padding: 22px;
@@ -664,9 +719,13 @@ tbody tr:last-child td {
     .search-box {
         max-width: 100%;
     }
+
+    .category-filter {
+        width: 100%;
+    }
 }
 
-/* Mobile: tabel berubah menjadi kartu */
+/* MOBILE */
 @media (max-width: 600px) {
     .menu-panel {
         margin-top: 20px;
@@ -677,6 +736,7 @@ tbody tr:last-child td {
     .panel-heading {
         align-items: flex-start;
         flex-direction: column;
+        gap: 10px;
         margin-bottom: 18px;
     }
 
@@ -686,6 +746,10 @@ tbody tr:last-child td {
 
     .panel-heading p {
         font-size: 12px;
+    }
+
+    .result-count {
+        padding: 7px 11px;
     }
 
     .toolbar {
@@ -728,9 +792,13 @@ tbody tr:last-child td {
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 12px 10px;
         padding: 12px 10px;
-        background: #fff;
+        background: #ffffff;
         border: 1px solid #e9eaed;
         border-radius: 12px;
+    }
+
+    tbody tr:hover {
+        background: #ffffff;
     }
 
     tbody td {
@@ -744,7 +812,6 @@ tbody tr:last-child td {
         font-size: 12px;
     }
 
-    /* Menu memenuhi lebar kartu */
     tbody td:first-child {
         grid-column: 1 / -1;
     }
@@ -763,6 +830,10 @@ tbody tr:last-child td {
 
     .menu-info {
         width: 100%;
+        min-width: 0;
+    }
+
+    .menu-copy {
         min-width: 0;
     }
 
@@ -799,7 +870,6 @@ tbody tr:last-child td {
         height: 34px;
     }
 
-    /* Empty state */
     tbody tr:has(.empty-state) {
         display: block;
     }
@@ -813,7 +883,7 @@ tbody tr:last-child td {
     }
 }
 
-/* HP kecil */
+/* SMALL MOBILE */
 @media (max-width: 380px) {
     .menu-panel {
         padding: 13px;
@@ -836,13 +906,57 @@ tbody tr:last-child td {
     }
 }
 
-/* Aksesibilitas */
+/* ACCESSIBILITY */
 @media (prefers-reduced-motion: reduce) {
+    .menu-panel {
+        animation: none;
+    }
+
     .toggle-switch,
     .toggle-track,
     .toggle-thumb,
-    .icon-button {
+    .icon-button,
+    .category-filter button,
+    .search-box {
         transition: none;
     }
 }
+
+/* EMPTY STATE ALIGNMENT FIX */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 230px;
+    padding: 30px 15px;
+    text-align: center;
+}
+
+.empty-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    align-self: center;
+    width: 58px;
+    height: 58px;
+    flex-shrink: 0;
+    margin: 0 auto 15px;
+}
+
+.empty-icon svg {
+    display: block;
+    width: 27px;
+    height: 27px;
+}
+
+.empty-state strong,
+.empty-state p {
+    width: 100%;
+    text-align: center;
+}
+
 </style>
+
+

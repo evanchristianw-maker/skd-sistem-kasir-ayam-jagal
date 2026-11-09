@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { computed } from "vue";
 
 const props = defineProps({
@@ -45,7 +45,7 @@ const summaryCards = computed(() => [
     <section class="summary-section">
         <div class="section-heading">
             <h3>Ringkasan Menu</h3>
-            <span>Statistik keseluruhan</span>
+            
         </div>
 
         <div class="summary-grid">
@@ -140,10 +140,14 @@ const summaryCards = computed(() => [
 </template>
 
 <style scoped>
+* {
+    box-sizing: border-box;
+}
+
 .summary-section {
     width: 100%;
     margin-bottom: 30px;
-    animation: summaryFadeUp 0.55s ease both;
+    animation: summaryFadeUp 0.5s ease both;
 }
 
 /* SECTION HEADING */
@@ -160,6 +164,7 @@ const summaryCards = computed(() => [
     color: #202124;
     font-size: 21px;
     font-weight: 800;
+    letter-spacing: -0.4px;
 }
 
 .section-heading > span {
@@ -171,126 +176,109 @@ const summaryCards = computed(() => [
 .summary-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 19px;
+    gap: 18px;
     width: 100%;
 }
 
 /* SUMMARY CARD */
 .summary-card {
-    position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    width: 100%;
+    align-items: center;
+    justify-content: center;
     min-width: 0;
-    min-height: 190px;
-    padding: 22px;
-    overflow: hidden;
-    border: 1px solid #ededed;
-    border-radius: 17px;
+    min-height: 178px;
+    padding: 20px 16px;
+    border: 1px solid #eceef1;
+    border-radius: 16px;
     background: #ffffff;
-    box-shadow: 0 4px 15px rgba(20, 20, 20, 0.035);
-    animation: summaryFadeUp 0.55s ease both;
+    box-shadow: 0 3px 12px rgba(20, 25, 35, 0.035);
+    text-align: center;
+    animation: summaryFadeUp 0.5s ease both;
     animation-delay: calc(var(--card-index) * 0.08s);
     transition:
-        transform 0.25s ease,
-        box-shadow 0.25s ease;
-}
-
-.summary-card::after {
-    content: "";
-    position: absolute;
-    top: -45px;
-    right: -45px;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    opacity: 0.05;
-    background: currentColor;
-    pointer-events: none;
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .summary-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.075);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 22px rgba(20, 25, 35, 0.07);
 }
 
 /* ICON */
 .summary-card-top {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
 }
 
 .summary-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 49px;
-    height: 49px;
-    flex: 0 0 49px;
-    border-radius: 13px;
+    width: 43px;
+    height: 43px;
+    flex-shrink: 0;
+    margin-bottom: 17px;
+    border-radius: 12px;
 }
 
 .summary-icon svg {
-    width: 27px;
-    height: 27px;
+    width: 22px;
+    height: 22px;
 }
 
-/* CARD COLORS */
-.card-red {
-    color: #ca0708;
-}
-
+/* COLOR VARIANTS */
 .card-red .summary-icon {
     color: #ca0708;
     background: #fff0f0;
 }
 
-.card-green {
-    color: #179b61;
+.card-orange .summary-icon {
+    color: #e58a20;
+    background: #fff5e8;
 }
 
 .card-green .summary-icon {
-    color: #179b61;
-    background: #e9f8f0;
-}
-
-.card-orange {
-    color: #e98516;
-}
-
-.card-orange .summary-icon {
-    color: #e98516;
-    background: #fff4e7;
+    color: #199b62;
+    background: #eaf8f1;
 }
 
 /* CARD CONTENT */
 .summary-card-bottom {
-    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
 }
 
 .summary-card-bottom p {
-    margin: 0 0 8px;
-    color: #626875;
-    font-size: 14px;
-    font-weight: 500;
+    margin: 0 0 7px;
+    color: #747b87;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
 }
 
 .summary-card-bottom h3 {
     margin: 0;
     color: #202124;
-    font-size: 25px;
+    font-size: clamp(19px, 1.7vw, 25px);
     font-weight: 800;
-    letter-spacing: -0.5px;
+    line-height: 1.3;
+    letter-spacing: -0.7px;
     overflow-wrap: anywhere;
 }
 
 .summary-card-bottom > span {
     display: block;
     margin-top: 7px;
-    color: #777e89;
-    font-size: 12px;
+    color: #9298a2;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
 }
 
 /* ANIMATION */
@@ -310,23 +298,58 @@ const summaryCards = computed(() => [
 @media (max-width: 900px) {
     .summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .summary-card {
+        min-height: 170px;
+    }
+
+    .summary-card-bottom h3 {
+        font-size: 23px;
     }
 }
 
 /* MOBILE */
-@media (max-width: 480px) {
+@media (max-width: 600px) {
+    .summary-section {
+        margin-bottom: 24px;
+    }
+
     .summary-grid {
-        grid-template-columns: 1fr;
         gap: 12px;
     }
 
     .summary-card {
-        min-height: 150px;
-        padding: 15px;
+        min-height: 160px;
+        padding: 17px 10px;
+        border-radius: 14px;
+    }
+
+    .summary-icon {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 14px;
+        border-radius: 11px;
+    }
+
+    .summary-icon svg {
+        width: 21px;
+        height: 21px;
+    }
+
+    .summary-card-bottom p {
+        margin-bottom: 6px;
+        font-size: 11px;
     }
 
     .summary-card-bottom h3 {
-        font-size: 20px;
+        font-size: clamp(17px, 4.5vw, 21px);
+    }
+
+    .summary-card-bottom > span {
+        margin-top: 5px;
+        font-size: 10px;
     }
 
     .section-heading h3 {
@@ -335,6 +358,28 @@ const summaryCards = computed(() => [
 
     .section-heading > span {
         font-size: 11px;
+    }
+}
+
+/* SMALL MOBILE */
+@media (max-width: 350px) {
+    .summary-grid {
+        gap: 9px;
+    }
+
+    .summary-card {
+        min-height: 150px;
+        padding: 14px 8px;
+    }
+
+    .summary-icon {
+        width: 36px;
+        height: 36px;
+        margin-bottom: 12px;
+    }
+
+    .summary-card-bottom h3 {
+        font-size: 16px;
     }
 }
 
@@ -347,3 +392,5 @@ const summaryCards = computed(() => [
     }
 }
 </style>
+
+

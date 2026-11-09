@@ -5,6 +5,7 @@ import { router, usePage } from "@inertiajs/vue3";
 // SHARED COMPONENTS
 import AdminHeader from "@/Components/Admin/Shared/AdminHeader.vue";
 import AdminLogoutModal from "@/Components/Admin/Shared/AdminLogoutModal.vue";
+import MenuBottomNavigation from "@/Components/Admin/Menu/MenuBottomNavigation.vue";
 
 // SALES COMPONENTS
 import SalesFilter from "@/Components/Admin/Reports/Sales/SalesFilter.vue";
@@ -152,9 +153,6 @@ const handleResetFilter = () => {
                 <!-- PAGE HEADING -->
                 <section class="sales-page-heading">
                     <div>
-                        <span class="sales-eyebrow">
-                            ANALISIS BISNIS
-                        </span>
 
                         <h1>Laporan Penjualan</h1>
 
@@ -184,6 +182,7 @@ const handleResetFilter = () => {
                 />
 
                 <!-- TRANSACTION HISTORY -->
+                                <!-- TRANSACTION HISTORY -->
                 <section class="sales-content-card">
                     <div class="sales-section-heading">
                         <div>
@@ -195,11 +194,15 @@ const handleResetFilter = () => {
                         </div>
 
                         <span class="sales-transaction-count">
-                            {{ filteredTransactions.length }} Transaksi
+                            {{ filteredTransactions.length }} transaksi
                         </span>
                     </div>
 
-                    <div class="sales-table-wrapper">
+                    <!-- TRANSACTION TABLE -->
+                    <div
+                        v-if="filteredTransactions.length > 0"
+                        class="sales-table-wrapper"
+                    >
                         <table class="sales-table">
                             <thead>
                                 <tr>
@@ -249,24 +252,56 @@ const handleResetFilter = () => {
                                         </span>
                                     </td>
                                 </tr>
-
-                                <tr v-if="filteredTransactions.length === 0">
-                                    <td colspan="7" class="empty-sales">
-                                        Tidak ada transaksi pada periode ini.
-                                    </td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- EMPTY STATE -->
+                    <div v-else class="sales-empty-state">
+                        <div class="sales-empty-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <rect
+                                    x="4"
+                                    y="3"
+                                    width="16"
+                                    height="18"
+                                    rx="2"
+                                    stroke="currentColor"
+                                    stroke-width="1.7"
+                                />
+                                <path
+                                    d="M8 8H16M8 12H16M8 16H13"
+                                    stroke="currentColor"
+                                    stroke-width="1.7"
+                                    stroke-linecap="round"
+                                />
+                            </svg>
+                        </div>
+
+                        <h3>Belum Ada Transaksi</h3>
+
+                        <p>
+                            Transaksi penjualan yang berhasil dilakukan akan
+                            ditampilkan di bagian ini.
+                        </p>
+                    </div>
                 </section>
 
-                <!-- DATA INFORMATION -->
-                <p class="sales-data-note">
-                    Data laporan diambil langsung dari database sistem kasir.
-                </p>
+                <!-- FOOTER -->
+                <footer class="dashboard-footer">
+                    <p>
+                        &copy; {{ new Date().getFullYear() }}
+                        <strong>UMKM Ayam Jagal</strong>. All rights reserved.
+                    </p>
+
+                    <span>Point of Sale System</span>
+                </footer>
 
             </div>
         </main>
+
+        <!-- BOTTOM NAVIGATION -->
+        <MenuBottomNavigation />
 
         <!-- LOGOUT MODAL -->
         <AdminLogoutModal
@@ -277,3 +312,8 @@ const handleResetFilter = () => {
 
     </div>
 </template>
+
+
+
+
+

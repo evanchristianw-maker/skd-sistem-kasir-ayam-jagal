@@ -54,7 +54,7 @@ const cards = [
                     {{ card.label }}
                 </span>
 
-                <div class="summary-card-icon">
+                <div class="summary-card-icon" :class="`icon-${card.icon}`">
                     <svg
                         v-if="card.icon === 'sales' || card.icon === 'average'"
                         viewBox="0 0 24 24"
@@ -103,3 +103,6 @@ const cards = [
         </article>
     </section>
 </template>
+
+
+

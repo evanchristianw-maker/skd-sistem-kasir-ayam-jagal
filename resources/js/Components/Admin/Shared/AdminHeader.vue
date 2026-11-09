@@ -93,6 +93,9 @@ onBeforeUnmount(() => {
                     type="button"
                     class="header-action"
                     aria-label="Notifikasi"
+                    aria-haspopup="true"
+                    :aria-expanded="showingNotifications"
+                    aria-controls="notification-dropdown"
                     @click="openNotifications"
                 >
                     <svg viewBox="0 0 24 24" fill="none">
@@ -121,6 +124,10 @@ onBeforeUnmount(() => {
                 <button
                     type="button"
                     class="profile-button"
+                    aria-label="Menu profil administrator"
+                    aria-haspopup="true"
+                    :aria-expanded="showingProfileMenu"
+                    aria-controls="profile-dropdown"
                     @click="openProfileMenu"
                 >
                     <div class="profile-avatar-small">
@@ -169,7 +176,11 @@ onBeforeUnmount(() => {
                 class="dropdown-backdrop"
                 @click.self="showingProfileMenu = false"
             >
-                <div class="profile-dropdown">
+                <div
+                    id="profile-dropdown"
+                    class="profile-dropdown"
+                    aria-label="Menu profil administrator"
+                >
                     <div class="dropdown-user">
                         <div class="dropdown-avatar">
                             <svg viewBox="0 0 24 24" fill="none">
@@ -223,7 +234,12 @@ onBeforeUnmount(() => {
                 class="dropdown-backdrop"
                 @click.self="showingNotifications = false"
             >
-                <div class="notification-dropdown">
+                <div
+                    id="notification-dropdown"
+                    class="notification-dropdown"
+                    role="region"
+                    aria-label="Daftar notifikasi"
+                >
                     <div class="notification-heading">
                         <strong>Notifikasi</strong>
                         <span>{{ notificationCount }} informasi</span>
@@ -354,6 +370,18 @@ onBeforeUnmount(() => {
     color: white;
     background: rgba(255, 255, 255, 0.12);
     cursor: pointer;
+}
+
+.header-action:hover,
+.profile-button:hover {
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.header-action:focus-visible,
+.profile-button:focus-visible,
+.dropdown-logout:focus-visible {
+    outline: 3px solid #ffe08a;
+    outline-offset: 3px;
 }
 
 .header-action svg {
@@ -664,3 +692,5 @@ onBeforeUnmount(() => {
     }
 }
 </style>
+
+

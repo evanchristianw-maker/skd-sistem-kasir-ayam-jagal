@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from "vue";
 import { router, usePage } from "@inertiajs/vue3";
 
@@ -30,8 +30,12 @@ const props = defineProps({
 // AUTHENTICATION
 const page = usePage();
 
+const adminName = computed(() => {
+    return page.props.auth?.user?.name || "Admin";
+});
+
 const adminEmail = computed(() => {
-    return page.props.auth?.user?.email || "adminayamjagal@gmail.com";
+    return page.props.auth?.user?.email || "-";
 });
 
 // LOGOUT MANAGEMENT
@@ -51,7 +55,6 @@ const logout = () => {
 
 // MENU MANAGEMENT
 const {
-    adminName,
     searchQuery,
     selectedCategory,
     showModal,
@@ -91,7 +94,6 @@ const {
                 <!-- PAGE HEADING -->
                 <section class="page-heading">
                     <div class="page-heading-content">
-                        <span class="eyebrow"> MANAJEMEN PRODUK </span>
 
                         <h1>Kelola Menu &amp; Harga</h1>
 
@@ -141,7 +143,7 @@ const {
                 <!-- FOOTER -->
                 <footer class="menu-footer">
                     <p>
-                        Â© {{ new Date().getFullYear() }}
+                        &copy; {{ new Date().getFullYear() }}
                         <strong>UMKM Ayam Jagal</strong>. All rights reserved.
                     </p>
 
@@ -198,10 +200,8 @@ const {
     margin: 0 auto;
     padding-bottom: 100px;
     overflow-x: hidden;
-
     color: var(--text-primary);
     background: var(--background);
-
     font-family: Inter, "Segoe UI", Arial, sans-serif;
 }
 
@@ -223,9 +223,7 @@ const {
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-
     margin-bottom: 34px;
-
     animation: welcomeFadeUp 0.5s ease both;
 }
 
@@ -236,9 +234,7 @@ const {
 .eyebrow {
     display: inline-block;
     margin-bottom: 9px;
-
-    color: #ca0708;
-
+    color: var(--primary);
     font-size: 11px;
     font-weight: 800;
     letter-spacing: 1.2px;
@@ -246,56 +242,47 @@ const {
 
 .page-heading h1 {
     margin: 0;
-
-    color: #202124;
-
+    color: var(--text-primary);
     font-size: 28px;
     font-weight: 800;
     letter-spacing: -0.7px;
+    line-height: 1.25;
 }
 
 .page-heading p {
     margin: 10px 0 0;
-
-    color: #626875;
-
+    color: var(--text-secondary);
     font-size: 15px;
     line-height: 1.6;
 }
 
 .primary-button {
-    min-height: 48px;
+    min-height: 46px;
     flex-shrink: 0;
-
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 9px;
-
-    padding: 0 19px;
-
-    border: 1px solid #ca0708;
+    padding: 0 18px;
+    border: 1px solid var(--primary);
     border-radius: 10px;
-
-    color: white;
-    background: #ca0708;
-
+    color: #fff;
+    background: var(--primary);
     font-family: inherit;
     font-size: 13px;
     font-weight: 700;
-
     cursor: pointer;
-
-    transition:
-        background 0.2s ease,
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .primary-button:hover {
-    background: #a80000;
+    background: var(--primary-dark);
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(202, 7, 8, 0.18);
+}
+
+.primary-button:active {
+    transform: translateY(0);
 }
 
 .primary-button svg {
@@ -308,10 +295,8 @@ const {
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-
     margin-top: 28px;
     padding: 18px 0 5px;
-
     border-top: 1px solid #e9eaed;
 }
 
@@ -331,7 +316,6 @@ const {
         opacity: 0;
         transform: translateY(13px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -356,6 +340,7 @@ const {
     .page-heading {
         align-items: flex-start;
         flex-direction: column;
+        gap: 13px;
         margin-bottom: 30px;
     }
 
@@ -390,6 +375,14 @@ const {
         padding-left: 12px;
         padding-right: 12px;
     }
+
+    .page-heading h1 {
+        font-size: 23px;
+    }
+
+    .page-heading p {
+        font-size: 13px;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -402,3 +395,7 @@ const {
     }
 }
 </style>
+
+
+
+
