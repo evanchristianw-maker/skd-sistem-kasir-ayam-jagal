@@ -1,27 +1,31 @@
-<script setup>
-import DashboardSidebar from "@/Components/Admin/Dashboard/DashboardSidebar.vue";
-import DashboardTransactions from "@/Components/Admin/Dashboard/DashboardTransactions.vue";
-import AdminLogoutModal from "@/Components/Admin/Shared/AdminLogoutModal.vue";
-import DashboardChart from "@/Components/Admin/Dashboard/DashboardChart.vue";
-import { ref, computed, onMounted, onBeforeUnmount } from "vue";
-import { Link, router, usePage } from "@inertiajs/vue3";
+﻿<script setup>
+import { ref, computed } from "vue";
+import { router, usePage } from "@inertiajs/vue3";
+
 import AdminHeader from "@/Components/Admin/Shared/AdminHeader.vue";
+import AdminLogoutModal from "@/Components/Admin/Shared/AdminLogoutModal.vue";
+
+import MenuBottomNavigation from "@/Components/Admin/Menu/MenuBottomNavigation.vue";
 import DashboardSummary from "@/Components/Admin/Dashboard/DashboardSummary.vue";
+import DashboardChart from "@/Components/Admin/Dashboard/DashboardChart.vue";
+import DashboardTransactions from "@/Components/Admin/Dashboard/DashboardTransactions.vue";
 
 const props = defineProps({
     summary: {
         type: Object,
         default: () => ({
-            total_sales: 1684000,
-            transaction_count: 360,
-            active_menus: 25,
-            inactive_menus: 5,
+            total_sales: 0,
+            transaction_count: 0,
+            active_menus: 0,
+            inactive_menus: 0,
         }),
     },
+
     sales_chart: {
         type: Array,
         default: () => [],
     },
+
     recent_transactions: {
         type: Array,
         default: () => [],
@@ -35,13 +39,12 @@ const adminName = computed(() => {
 });
 
 const adminEmail = computed(() => {
-    return page.props.auth?.user?.email || "adminayamjagal@gmail.com";
+    return page.props.auth?.user?.email || "-";
 });
 
-const showingProfileMenu = ref(false);
 const showingLogoutConfirmation = ref(false);
-const showingNotifications = ref(false);
 const activeChartPoint = ref(null);
+const selectedChartPeriod = ref("7d");
 
 const formatRupiah = (value) => {
     return new Intl.NumberFormat("id-ID", {
@@ -96,8 +99,6 @@ const summaryCards = computed(() => [
     },
 ]);
 
-const selectedChartPeriod = ref("7d");
-
 const chartPeriods = [
     { label: "7 Hari Terakhir", value: "7d" },
     { label: "30 Hari Terakhir", value: "30d" },
@@ -105,41 +106,23 @@ const chartPeriods = [
 ];
 
 const periodDescription = computed(() => {
-    if (selectedChartPeriod.value === "30d") {
-        return "Performa penjualan selama 30 hari terakhir.";
-    }
+    const descriptions = {
+        "7d": "Performa penjualan selama 7 hari terakhir.",
+        "30d": "Performa penjualan selama 30 hari terakhir.",
+        "12m": "Performa penjualan selama 12 bulan terakhir.",
+    };
 
-    if (selectedChartPeriod.value === "12m") {
-        return "Performa penjualan selama 12 bulan terakhir.";
-    }
-
-    return "Performa penjualan selama 7 hari terakhir.";
+    return descriptions[selectedChartPeriod.value];
 });
 
-const demoChartData = () => {
-    const today = new Date();
-    const values = [250000, 420000, 180000, 530000, 350000, 680000, 450000];
-
-    return Array.from({ length: 365 }, (_, index) => {
-        const date = new Date(today);
-        date.setHours(12, 0, 0, 0);
-        date.setDate(today.getDate() - (364 - index));
-
-        return {
-            date: date.toISOString().slice(0, 10),
-            total: values[index % values.length],
-        };
-    });
-};
-
 const normalizedSalesData = computed(() => {
-    const source = props.sales_chart.length
-        ? props.sales_chart
-        : demoChartData();
-
-    return source
+    return props.sales_chart
         .map((item) => {
-            const date = new Date(`${item.date}T12:00:00`);
+            const rawDate = String(item.date || "");
+
+            const date = new Date(
+                rawDate.length === 10 ? `${rawDate}T12:00:00` : rawDate,
+            );
 
             return {
                 date,
@@ -150,69 +133,85 @@ const normalizedSalesData = computed(() => {
         .sort((a, b) => a.date - b.date);
 });
 
+const dateKey = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+};
+
 const chartData = computed(() => {
     const today = new Date();
     today.setHours(12, 0, 0, 0);
 
-    if (selectedChartPeriod.value === "12m") {
-        const months = [];
+    const dailySales = new Map();
+    const monthlySales = new Map();
 
-        for (let offset = 11; offset >= 0; offset--) {
+    normalizedSalesData.value.forEach((item) => {
+        const dailyKey = dateKey(item.date);
+
+        const monthlyKey = `${item.date.getFullYear()}-${String(
+            item.date.getMonth() + 1,
+        ).padStart(2, "0")}`;
+
+        dailySales.set(
+            dailyKey,
+            (dailySales.get(dailyKey) || 0) + item.total,
+        );
+
+        monthlySales.set(
+            monthlyKey,
+            (monthlySales.get(monthlyKey) || 0) + item.total,
+        );
+    });
+
+    if (selectedChartPeriod.value === "12m") {
+        return Array.from({ length: 12 }, (_, index) => {
             const monthDate = new Date(
                 today.getFullYear(),
-                today.getMonth() - offset,
+                today.getMonth() - 11 + index,
                 1,
                 12,
             );
-            const year = monthDate.getFullYear();
-            const month = monthDate.getMonth();
-            const total = normalizedSalesData.value
-                .filter(
-                    (item) =>
-                        item.date.getFullYear() === year &&
-                        item.date.getMonth() === month,
-                )
-                .reduce((sum, item) => sum + item.total, 0);
 
-            months.push({
+            const key = `${monthDate.getFullYear()}-${String(
+                monthDate.getMonth() + 1,
+            ).padStart(2, "0")}`;
+
+            return {
                 label: monthDate.toLocaleDateString("id-ID", {
                     month: "short",
                 }),
-                total,
-            });
-        }
-
-        return months;
+                total: monthlySales.get(key) || 0,
+            };
+        });
     }
 
     const days = selectedChartPeriod.value === "30d" ? 30 : 7;
-    const result = [];
 
-    for (let offset = days - 1; offset >= 0; offset--) {
+    return Array.from({ length: days }, (_, index) => {
         const date = new Date(today);
-        date.setDate(today.getDate() - offset);
-        const key = date.toDateString();
-        const total = normalizedSalesData.value
-            .filter((item) => item.date.toDateString() === key)
-            .reduce((sum, item) => sum + item.total, 0);
+        date.setDate(today.getDate() - (days - 1 - index));
 
-        result.push({
+        return {
             label:
                 selectedChartPeriod.value === "30d"
                     ? date.toLocaleDateString("id-ID", {
                           day: "numeric",
                           month: "short",
                       })
-                    : date.toLocaleDateString("id-ID", { weekday: "short" }),
-            total,
-        });
-    }
-
-    return result;
+                    : date.toLocaleDateString("id-ID", {
+                          weekday: "short",
+                      }),
+            total: dailySales.get(dateKey(date)) || 0,
+        };
+    });
 });
 
 const chartWidth = 600;
 const chartHeight = 240;
+
 const chartPadding = {
     top: 25,
     right: 20,
@@ -233,11 +232,13 @@ const chartPoints = computed(() => {
 
     return data.map((item, index) => ({
         ...item,
+
         x:
             chartPadding.left +
             (data.length === 1
                 ? usableWidth / 2
                 : (index / (data.length - 1)) * usableWidth),
+
         y:
             chartHeight -
             chartPadding.bottom -
@@ -247,9 +248,10 @@ const chartPoints = computed(() => {
 
 const chartLinePath = computed(() => {
     return chartPoints.value
-        .map((point, index) => {
-            return `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`;
-        })
+        .map(
+            (point, index) =>
+                `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`,
+        )
         .join(" ");
 });
 
@@ -311,31 +313,8 @@ const tooltipStyle = computed(() => {
     };
 });
 
-const demoTransactions = [
-    {
-        id: "ID-123",
-        created_at: "2026-10-20T10:30:00",
-        total: 145000,
-        status: "selesai",
-    },
-    {
-        id: "ID-124",
-        created_at: "2026-10-20T11:15:00",
-        total: 75000,
-        status: "selesai",
-    },
-    {
-        id: "ID-125",
-        created_at: "2026-10-20T12:20:00",
-        total: 95000,
-        status: "selesai",
-    },
-];
-
 const transactions = computed(() => {
-    return props.recent_transactions.length
-        ? props.recent_transactions
-        : demoTransactions;
+    return props.recent_transactions;
 });
 
 const formatTransactionDate = (date) => {
@@ -377,34 +356,12 @@ const transactionStatus = (status) => {
     };
 };
 
-const notifications = [
-    {
-        title: "Selamat datang",
-        message: "Selamat bekerja di Dashboard UMKM Ayam Jagal.",
-        time: "Informasi sistem",
-    },
-];
-
-const notificationCount = computed(() => notifications.length);
-
-const openProfileMenu = () => {
-    showingNotifications.value = false;
-    showingProfileMenu.value = !showingProfileMenu.value;
-};
-
-const openNotifications = () => {
-    showingProfileMenu.value = false;
-    showingNotifications.value = !showingNotifications.value;
-};
-
-const closePopups = () => {
-    showingProfileMenu.value = false;
-    showingNotifications.value = false;
-    showingLogoutConfirmation.value = false;
+const handlePeriodChange = (value) => {
+    selectedChartPeriod.value = value;
+    activeChartPoint.value = null;
 };
 
 const openLogoutConfirmation = () => {
-    showingProfileMenu.value = false;
     showingLogoutConfirmation.value = true;
 };
 
@@ -415,18 +372,6 @@ const cancelLogout = () => {
 const logout = () => {
     router.post(route("logout"));
 };
-
-const handleEscape = (event) => {
-    if (event.key === "Escape") closePopups();
-};
-
-onMounted(() => {
-    window.addEventListener("keydown", handleEscape);
-});
-
-onBeforeUnmount(() => {
-    window.removeEventListener("keydown", handleEscape);
-});
 </script>
 
 <template>
@@ -475,44 +420,51 @@ onBeforeUnmount(() => {
                 <DashboardSummary :cards="summaryCards" />
 
                 <DashboardChart
-    :chart-periods="chartPeriods"
-    :selected-chart-period="selectedChartPeriod"
-    :period-description="periodDescription"
-    :total-chart-sales="totalChartSales"
-    :average-chart-sales="averageChartSales"
-    :highest-chart-sales="highestChartSales"
-    :chart-width="chartWidth"
-    :chart-height="chartHeight"
-    :chart-points="chartPoints"
-    :chart-line-path="chartLinePath"
-    :chart-area-path="chartAreaPath"
-    :chart-grid-lines="chartGridLines"
-    :active-chart-point="activeChartPoint"
-    :tooltip-style="tooltipStyle"
-    :format-rupiah="formatRupiah"
-    @period-change="(value) => {
-        selectedChartPeriod = value;
-        activeChartPoint = null;
-    }"
-    @show-tooltip="showChartTooltip"
-    @hide-tooltip="hideChartTooltip"
-/>
+                    :chart-periods="chartPeriods"
+                    :selected-chart-period="selectedChartPeriod"
+                    :period-description="periodDescription"
+                    :total-chart-sales="totalChartSales"
+                    :average-chart-sales="averageChartSales"
+                    :highest-chart-sales="highestChartSales"
+                    :chart-width="chartWidth"
+                    :chart-height="chartHeight"
+                    :chart-points="chartPoints"
+                    :chart-line-path="chartLinePath"
+                    :chart-area-path="chartAreaPath"
+                    :chart-grid-lines="chartGridLines"
+                    :active-chart-point="activeChartPoint"
+                    :tooltip-style="tooltipStyle"
+                    :format-rupiah="formatRupiah"
+                    @period-change="handlePeriodChange"
+                    @show-tooltip="showChartTooltip"
+                    @hide-tooltip="hideChartTooltip"
+                />
 
-                <DashboardTransactions :transactions="transactions" :format-transaction-date="formatTransactionDate" :format-rupiah="formatRupiah" :transaction-status="transactionStatus" />
+                <DashboardTransactions
+                    :transactions="transactions"
+                    :format-transaction-date="formatTransactionDate"
+                    :format-rupiah="formatRupiah"
+                    :transaction-status="transactionStatus"
+                />
 
                 <footer class="dashboard-footer">
                     <p>
-                        © {{ new Date().getFullYear() }}
+                        &copy; {{ new Date().getFullYear() }}
                         <strong>UMKM Ayam Jagal</strong>. All rights reserved.
                     </p>
+
                     <span>Point of Sale System</span>
                 </footer>
             </div>
         </main>
 
-        <DashboardSidebar />
+        <MenuBottomNavigation />
 
-        <AdminLogoutModal :show="showingLogoutConfirmation" @cancel="cancelLogout" @confirm="logout" />
+        <AdminLogoutModal
+            :show="showingLogoutConfirmation"
+            @cancel="cancelLogout"
+            @confirm="logout"
+        />
     </div>
 </template>
 
@@ -532,7 +484,7 @@ onBeforeUnmount(() => {
     min-height: 100vh;
     min-height: 100dvh;
     margin: 0 auto;
-    padding-bottom: 100px;
+    padding-bottom: 110px;
     overflow-x: hidden;
     color: var(--text-primary);
     background: var(--background);
@@ -594,6 +546,7 @@ onBeforeUnmount(() => {
     width: 21px;
     height: 21px;
     color: #ca0708;
+    flex-shrink: 0;
 }
 
 .dashboard-footer {
@@ -637,7 +590,7 @@ onBeforeUnmount(() => {
 
 @media (max-width: 600px) {
     .app-layout {
-        padding-bottom: 100px;
+        padding-bottom: 110px;
     }
 
     .dashboard-container {
@@ -655,7 +608,7 @@ onBeforeUnmount(() => {
 
     .welcome-section p {
         max-width: 340px;
-        font-size: 15px;
+        font-size: 14px;
         line-height: 1.7;
     }
 
@@ -688,3 +641,5 @@ onBeforeUnmount(() => {
     }
 }
 </style>
+
+

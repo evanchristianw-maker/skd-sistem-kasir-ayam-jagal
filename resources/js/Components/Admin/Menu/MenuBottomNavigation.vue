@@ -1,30 +1,53 @@
-<script setup>
+﻿<script setup>
 import { Link, usePage } from "@inertiajs/vue3";
 import { computed } from "vue";
 
 const page = usePage();
 
+const navigationItems = [
+    {
+        label: "Dashboard",
+        href: "/dashboard",
+        icon: "dashboard",
+    },
+    {
+        label: "Menu",
+        href: "/menu",
+        icon: "menu",
+    },
+    {
+        label: "Penjualan",
+        href: "/sales",
+        icon: "sales",
+    },
+    {
+        label: "Keuangan",
+        href: "/finance",
+        icon: "finance",
+    },
+];
+
 const currentPath = computed(() => page.url.split("?")[0]);
 
-const isDashboardActive = computed(() => currentPath.value === "/dashboard");
-
-const isMenuActive = computed(() => currentPath.value === "/menu");
-
-const isSalesActive = computed(() => currentPath.value === "/sales");
-
-const isFinanceActive = computed(() => currentPath.value === "/finance");
+const isActive = (href) => currentPath.value === href;
 </script>
 
 <template>
     <nav class="bottom-navigation" aria-label="Navigasi utama">
-        <!-- Dashboard -->
         <Link
-            href="/dashboard"
+            v-for="item in navigationItems"
+            :key="item.href"
+            :href="item.href"
             class="nav-item"
-            :class="{ active: isDashboardActive }"
-            :aria-current="isDashboardActive ? 'page' : undefined"
+            :class="{ active: isActive(item.href) }"
+            :aria-current="isActive(item.href) ? 'page' : undefined"
         >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg
+                v-if="item.icon === 'dashboard'"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+            >
                 <path
                     d="M3 10L12 3L21 10V20C21 20.55 20.55 21 20 21H4C3.45 21 3 20.55 3 20V10Z"
                     stroke="currentColor"
@@ -38,17 +61,13 @@ const isFinanceActive = computed(() => currentPath.value === "/finance");
                     stroke-linejoin="round"
                 />
             </svg>
-            <span>Dashboard</span>
-        </Link>
 
-        <!-- Menu -->
-        <Link
-            href="/menu"
-            class="nav-item"
-            :class="{ active: isMenuActive }"
-            :aria-current="isMenuActive ? 'page' : undefined"
-        >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg
+                v-else-if="item.icon === 'menu'"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+            >
                 <rect
                     x="4"
                     y="4"
@@ -64,17 +83,13 @@ const isFinanceActive = computed(() => currentPath.value === "/finance");
                     stroke-width="1.5"
                 />
             </svg>
-            <span>Menu</span>
-        </Link>
 
-        <!-- Penjualan -->
-        <Link
-            href="/sales"
-            class="nav-item"
-            :class="{ active: isSalesActive }"
-            :aria-current="isSalesActive ? 'page' : undefined"
-        >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg
+                v-else-if="item.icon === 'sales'"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+            >
                 <path
                     d="M12 3V12H21"
                     stroke="currentColor"
@@ -88,17 +103,13 @@ const isFinanceActive = computed(() => currentPath.value === "/finance");
                     stroke-linecap="round"
                 />
             </svg>
-            <span>Penjualan</span>
-        </Link>
 
-        <!-- Keuangan -->
-        <Link
-            href="/finance"
-            class="nav-item"
-            :class="{ active: isFinanceActive }"
-            :aria-current="isFinanceActive ? 'page' : undefined"
-        >
-            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <svg
+                v-else-if="item.icon === 'finance'"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+            >
                 <rect
                     x="3"
                     y="5"
@@ -115,7 +126,8 @@ const isFinanceActive = computed(() => currentPath.value === "/finance");
                     stroke-linecap="round"
                 />
             </svg>
-            <span>Keuangan</span>
+
+            <span>{{ item.label }}</span>
         </Link>
     </nav>
 </template>
@@ -180,6 +192,12 @@ const isFinanceActive = computed(() => currentPath.value === "/finance");
 
 .nav-item:active {
     transform: scale(0.96);
+}
+
+.nav-item:focus-visible {
+    outline: 3px solid #ca0708;
+    outline-offset: 3px;
+    z-index: 1;
 }
 
 .nav-item.active {
@@ -247,3 +265,4 @@ const isFinanceActive = computed(() => currentPath.value === "/finance");
     }
 }
 </style>
+

@@ -1,15 +1,30 @@
 <script setup>
-import { Link } from "@inertiajs/vue3";
+import { Link, usePage } from "@inertiajs/vue3";
+import { computed } from "vue";
+
+const page = usePage();
+
+const currentPath = computed(() => page.url.split("?")[0]);
+
+const isDashboardActive = computed(() => currentPath.value === "/dashboard");
+
+const isMenuActive = computed(() => currentPath.value === "/menu");
+
+const isSalesActive = computed(() => currentPath.value === "/sales");
+
+const isFinanceActive = computed(() => currentPath.value === "/finance");
 </script>
 
 <template>
-    <nav class="bottom-navigation">
+    <nav class="bottom-navigation" aria-label="Navigasi utama">
+        <!-- Dashboard -->
         <Link
-            :href="route('dashboard')"
-            class="nav-item active"
-            aria-current="page"
+            href="/dashboard"
+            class="nav-item"
+            :class="{ active: isDashboardActive }"
+            :aria-current="isDashboardActive ? 'page' : undefined"
         >
-            <svg viewBox="0 0 24 24" fill="none">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path
                     d="M3 10L12 3L21 10V20C21 20.55 20.55 21 20 21H4C3.45 21 3 20.55 3 20V10Z"
                     stroke="currentColor"
@@ -26,8 +41,14 @@ import { Link } from "@inertiajs/vue3";
             <span>Dashboard</span>
         </Link>
 
-        <Link href="/menu" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none">
+        <!-- Menu -->
+        <Link
+            href="/menu"
+            class="nav-item"
+            :class="{ active: isMenuActive }"
+            :aria-current="isMenuActive ? 'page' : undefined"
+        >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <rect
                     x="4"
                     y="4"
@@ -46,8 +67,14 @@ import { Link } from "@inertiajs/vue3";
             <span>Menu</span>
         </Link>
 
-        <button type="button" class="nav-item" disabled>
-            <svg viewBox="0 0 24 24" fill="none">
+        <!-- Penjualan -->
+        <Link
+            href="/sales"
+            class="nav-item"
+            :class="{ active: isSalesActive }"
+            :aria-current="isSalesActive ? 'page' : undefined"
+        >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <path
                     d="M12 3V12H21"
                     stroke="currentColor"
@@ -62,10 +89,16 @@ import { Link } from "@inertiajs/vue3";
                 />
             </svg>
             <span>Penjualan</span>
-        </button>
+        </Link>
 
-        <button type="button" class="nav-item" disabled>
-            <svg viewBox="0 0 24 24" fill="none">
+        <!-- Keuangan -->
+        <Link
+            href="/finance"
+            class="nav-item"
+            :class="{ active: isFinanceActive }"
+            :aria-current="isFinanceActive ? 'page' : undefined"
+        >
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <rect
                     x="3"
                     y="5"
@@ -83,7 +116,7 @@ import { Link } from "@inertiajs/vue3";
                 />
             </svg>
             <span>Keuangan</span>
-        </button>
+        </Link>
     </nav>
 </template>
 
@@ -96,17 +129,19 @@ import { Link } from "@inertiajs/vue3";
     width: 100%;
     min-height: 84px;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: center;
     padding: 8px max(calc((100vw - 650px) / 2), 12px);
     border-top: 1px solid #eeeeee;
     background: rgba(255, 255, 255, 0.97);
     box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.035);
     backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 .nav-item {
     position: relative;
+    min-width: 0;
     min-height: 62px;
     display: flex;
     flex-direction: column;
@@ -118,17 +153,33 @@ import { Link } from "@inertiajs/vue3";
     color: #777e89;
     background: transparent;
     text-decoration: none;
-    transition: 0.2s ease;
+    font-family: inherit;
+    cursor: pointer;
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease,
+        transform 0.2s ease;
 }
 
 .nav-item svg {
     width: 25px;
     height: 25px;
+    flex-shrink: 0;
 }
 
 .nav-item span {
     font-size: 12px;
     font-weight: 600;
+    line-height: 1.2;
+}
+
+.nav-item:hover {
+    color: #ca0708;
+    background: #fff7f7;
+}
+
+.nav-item:active {
+    transform: scale(0.96);
 }
 
 .nav-item.active {
@@ -144,11 +195,19 @@ import { Link } from "@inertiajs/vue3";
     height: 4px;
     border-radius: 10px;
     background: #ca0708;
+    animation: indicatorAppear 0.25s ease both;
 }
 
-.nav-item:disabled {
-    cursor: not-allowed;
-    opacity: 0.65;
+@keyframes indicatorAppear {
+    from {
+        opacity: 0;
+        transform: scaleX(0.4);
+    }
+
+    to {
+        opacity: 1;
+        transform: scaleX(1);
+    }
 }
 
 @media (max-width: 768px) {
@@ -175,6 +234,16 @@ import { Link } from "@inertiajs/vue3";
 @media (max-width: 380px) {
     .nav-item span {
         font-size: 11px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .nav-item {
+        transition: none;
+    }
+
+    .nav-item.active::before {
+        animation: none;
     }
 }
 </style>

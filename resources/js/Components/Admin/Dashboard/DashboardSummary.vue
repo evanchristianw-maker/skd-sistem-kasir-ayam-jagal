@@ -5,90 +5,115 @@ defineProps({
         default: () => [],
     },
 });
+
+
 </script>
 
 <template>
-    <section class="summary-section">
-        <div class="section-heading">
-            <h3>Ringkasan Penjualan</h3>
-            <span>Statistik keseluruhan</span>
-        </div>
-
+    <section class="summary-section" aria-label="Ringkasan statistik">
         <div class="summary-grid">
             <article
                 v-for="(card, index) in cards"
                 :key="card.title"
                 class="summary-card"
-                :class="`card-${card.color}`"
-                :style="{ '--card-index': index }"
+                :class="[
+                    `summary-${card.color || 'red'}`,
+                    `summary-card-${index + 1}`,
+                ]"
             >
-                <div class="summary-card-top">
-                    <div class="summary-icon">
-                        <svg
-                            v-if="card.icon === 'money'"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                        >
-                            <circle
-                                cx="12"
-                                cy="12"
-                                r="9"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                            />
-                            <path
-                                d="M15 9.5C14.5 8.5 13.5 8 12 8C10.5 8 9.5 8.7 9.5 10C9.5 11.2 10.5 11.5 12 12C13.5 12.5 14.5 13 14.5 14.2C14.5 15.4 13.5 16 12 16C10.5 16 9.5 15.5 9 14.5M12 6V18"
-                                stroke="currentColor"
-                                stroke-width="1.6"
-                                stroke-linecap="round"
-                            />
-                        </svg>
+                <!-- ICON -->
+                <div class="card-icon">
+                    <!-- Total Penjualan -->
+                    <svg
+                        v-if="card.icon === 'money'"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                    >
+                        <rect
+                            x="3"
+                            y="5"
+                            width="18"
+                            height="14"
+                            rx="2"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                        />
+                        <path
+                            d="M12 9V15M14.5 10.5C14.5 9.67 13.38 9 12 9C10.62 9 9.5 9.67 9.5 10.5C9.5 11.33 10.62 12 12 12C13.38 12 14.5 12.67 14.5 13.5C14.5 14.33 13.38 15 12 15C10.62 15 9.5 14.33 9.5 13.5"
+                            stroke="currentColor"
+                            stroke-width="1.6"
+                            stroke-linecap="round"
+                        />
+                    </svg>
 
-                        <svg
-                            v-else-if="card.icon === 'transaction'"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                        >
-                            <rect
-                                x="4"
-                                y="3"
-                                width="16"
-                                height="18"
-                                rx="2"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                            />
-                            <path
-                                d="M8 8H16M8 12H16M8 16H13"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                                stroke-linecap="round"
-                            />
-                        </svg>
+                    <!-- Jumlah Transaksi -->
+                    <svg
+                        v-else-if="card.icon === 'transaction'"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                    >
+                        <path
+                            d="M7 3H14L19 8V20C19 20.55 18.55 21 18 21H6C5.45 21 5 20.55 5 20V5C5 3.9 5.9 3 7 3Z"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linejoin="round"
+                        />
+                        <path
+                            d="M13 3V9H19M8 13H16M8 17H14"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                        />
+                    </svg>
 
-                        <svg v-else viewBox="0 0 24 24" fill="none">
-                            <rect
-                                x="3"
-                                y="4"
-                                width="18"
-                                height="16"
-                                rx="2"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                            />
-                            <path
-                                d="M3 10H21M9 10V20"
-                                stroke="currentColor"
-                                stroke-width="1.8"
-                            />
-                        </svg>
-                    </div>
+                    <!-- Menu Aktif -->
+                    <svg
+                        v-else-if="card.icon === 'menu'"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                    >
+                        <path
+                            d="M4 7H20M4 12H20M4 17H20"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                        />
+                        <circle cx="7" cy="7" r="1" fill="currentColor" />
+                        <circle cx="7" cy="12" r="1" fill="currentColor" />
+                        <circle cx="7" cy="17" r="1" fill="currentColor" />
+                    </svg>
+
+                    <!-- Menu Nonaktif -->
+                    <svg v-else viewBox="0 0 24 24" fill="none">
+                        <circle
+                            cx="12"
+                            cy="12"
+                            r="9"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                        />
+                        <path
+                            d="M9 9L15 15M15 9L9 15"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            stroke-linecap="round"
+                        />
+                    </svg>
                 </div>
 
-                <div class="summary-card-bottom">
-                    <p>{{ card.title }}</p>
-                    <h3>{{ card.value }}</h3>
-                    <span>{{ card.description }}</span>
+                <!-- CONTENT -->
+                <div class="card-content">
+                    <p class="card-title">
+                        {{ card.title }}
+                    </p>
+
+                    <h3 class="card-value">
+                        {{ card.value }}
+                    </h3>
+
+                    <p class="card-description">
+                        {{ card.description }}
+                    </p>
                 </div>
             </article>
         </div>
@@ -96,179 +121,221 @@ defineProps({
 </template>
 
 <style scoped>
+* {
+    box-sizing: border-box;
+}
+
+.summary-section {
+    width: 100%;
+    margin-bottom: 30px;
+}
+
 .summary-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 19px;
+    gap: 18px;
+    width: 100%;
 }
 
+/* CARD */
 .summary-card {
-    position: relative;
-    min-height: 190px;
-    padding: 22px;
-    overflow: hidden;
-    border: 1px solid #ededed;
-    border-radius: 17px;
-    background: white;
-    box-shadow: 0 4px 15px rgba(20, 20, 20, 0.035);
-    animation: summaryFadeUp 0.55s ease both;
-    animation-delay: calc(var(--card-index) * 0.08s);
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 
-.summary-card::after {
-    content: "";
-    position: absolute;
-    top: -45px;
-    right: -45px;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    opacity: 0.05;
-    background: currentColor;
+    min-width: 0;
+    min-height: 178px;
+    padding: 20px 16px;
+
+    background: #ffffff;
+    border: 1px solid #eceef1;
+    border-radius: 16px;
+
+    box-shadow: 0 3px 12px rgba(20, 25, 35, 0.035);
+
+    text-align: center;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
 }
 
 .summary-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.075);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 22px rgba(20, 25, 35, 0.07);
 }
 
-.summary-card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.summary-icon {
-    width: 49px;
-    height: 49px;
+/* ICON */
+.card-icon {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 13px;
+
+    width: 43px;
+    height: 43px;
+    flex-shrink: 0;
+
+    margin-bottom: 17px;
+
+    border-radius: 12px;
 }
 
-.summary-icon svg {
-    width: 27px;
-    height: 27px;
+.card-icon svg {
+    width: 22px;
+    height: 22px;
 }
 
-.card-red {
-    color: #ca0708;
+/* CONTENT */
+.card-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    width: 100%;
+    min-width: 0;
 }
 
-.card-red .summary-icon {
+.card-title {
+    margin: 0 0 7px;
+
+    color: #747b87;
+
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.card-value {
+    margin: 0;
+
+    color: #202124;
+
+    font-size: clamp(19px, 1.7vw, 25px);
+    font-weight: 800;
+    line-height: 1.3;
+    letter-spacing: -0.7px;
+
+    overflow-wrap: anywhere;
+}
+
+.card-description {
+    margin: 7px 0 0;
+
+    color: #9298a2;
+
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* COLOR VARIANTS */
+.summary-red .card-icon {
     color: #ca0708;
     background: #fff0f0;
 }
 
-.card-orange {
-    color: #e98516;
+.summary-orange .card-icon {
+    color: #e58a20;
+    background: #fff5e8;
 }
 
-.card-orange .summary-icon {
-    color: #e98516;
-    background: #fff4e7;
+.summary-green .card-icon {
+    color: #199b62;
+    background: #eaf8f1;
 }
 
-.card-green {
-    color: #179b61;
+.summary-gray .card-icon {
+    color: #737b88;
+    background: #f0f1f3;
 }
 
-.card-green .summary-icon {
-    color: #179b61;
-    background: #e9f8f0;
-}
-
-.card-gray {
-    color: #747b88;
-}
-
-.card-gray .summary-icon {
-    color: #747b88;
-    background: #f0f1f4;
-}
-
-.summary-card-bottom {
-    margin-top: 18px;
-}
-
-.summary-card-bottom p {
-    margin: 0 0 8px;
-    color: #626875;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.summary-card-bottom h3 {
-    margin: 0;
-    color: #202124;
-    font-size: 25px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-    overflow-wrap: anywhere;
-}
-
-.summary-card-bottom > span {
-    display: block;
-    margin-top: 7px;
-    color: #777e89;
-    font-size: 12px;
-}
-
-.section-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 19px;
-}
-
-.section-heading h3 {
-    margin: 0;
-    color: #202124;
-    font-size: 21px;
-    font-weight: 800;
-}
-
-.section-heading > span {
-    color: #777e89;
-    font-size: 13px;
-}
-
-@keyframes summaryFadeUp {
-    from {
-        opacity: 0;
-        transform: translateY(15px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@media (max-width: 900px) {
+/* TABLET */
+@media (max-width: 1050px) {
     .summary-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .summary-card {
+        min-height: 170px;
+    }
+
+    .card-value {
+        font-size: 23px;
     }
 }
 
-@media (max-width: 480px) {
+/* MOBILE */
+@media (max-width: 600px) {
+    .summary-section {
+        margin-bottom: 24px;
+    }
+
     .summary-grid {
         gap: 12px;
     }
 
     .summary-card {
-        min-height: 150px;
-        padding: 15px;
+        min-height: 170px;
+        padding: 17px 10px;
+        border-radius: 14px;
     }
 
-    .summary-card-bottom h3 {
-        font-size: 20px;
+    .card-icon {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 14px;
+        border-radius: 11px;
     }
 
-    .section-heading h3 {
-        font-size: 17px;
+    .card-icon svg {
+        width: 21px;
+        height: 21px;
+    }
+
+    .card-title {
+        margin-bottom: 6px;
+        font-size: 11px;
+    }
+
+    .card-value {
+        font-size: clamp(17px, 4.5vw, 21px);
+    }
+
+    .card-description {
+        margin-top: 5px;
+        font-size: 10px;
+    }
+}
+
+/* SMALL MOBILE */
+@media (max-width: 350px) {
+    .summary-grid {
+        gap: 9px;
+    }
+
+    .summary-card {
+        min-height: 155px;
+        padding: 14px 8px;
+    }
+
+    .card-icon {
+        width: 36px;
+        height: 36px;
+        margin-bottom: 12px;
+    }
+
+    .card-value {
+        font-size: 16px;
+    }
+}
+
+/* ACCESSIBILITY */
+@media (prefers-reduced-motion: reduce) {
+    .summary-card {
+        transition: none;
     }
 }
 </style>
+
