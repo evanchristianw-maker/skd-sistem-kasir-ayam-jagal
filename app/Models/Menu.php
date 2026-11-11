@@ -13,6 +13,8 @@ class Menu extends Model
         'kategori',
         'harga',
         'status_menu',
+        'gambar',
+        'deskripsi',
     ];
 
     protected function casts(): array

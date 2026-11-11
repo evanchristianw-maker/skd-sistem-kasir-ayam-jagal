@@ -3,6 +3,8 @@
 use App\Http\Controllers\MenuController;
 use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\LaporanPenjualanController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FinanceController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -24,7 +26,7 @@ Route::get('/dashboard', function () {
     $user = auth()->user();
 
     if ($user->role === 'admin') {
-        return Inertia::render('Admin/Dashboard/Index');
+        return app(\App\Http\Controllers\DashboardController::class)->index();
     }
 
     if ($user->role === 'kasir') {
@@ -62,9 +64,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         ->name('sales.index');
 
     // Laporan Keuangan
-    Route::get('/finance', function () {
-        return Inertia::render('Admin/Finance/Index');
-    })->name('finance.index');
+    Route::get('/finance', [FinanceController::class, 'index'])
+        ->name('finance.index');
 });
 
 

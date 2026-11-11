@@ -38,6 +38,7 @@ const currentDate = computed(() => {
 
 const showPayment = ref(false);
 const showLogoutModal = ref(false);
+const receiptWidth = ref("58");
 
 const {
     menus,
@@ -120,13 +121,9 @@ const transactionDetails = computed(() => {
     );
 });
 
-const printReceipt = () => {
-    if (!transactionResult.value) return;
-    window.print();
-};
-
 const paymentMethodLabel = computed(() => {
-    const method = transactionResult.value?.metode_pembayaran || paymentMethod.value;
+    const method =
+        transactionResult.value?.metode_pembayaran || paymentMethod.value;
 
     const labels = {
         tunai: "Tunai",
@@ -156,6 +153,12 @@ const transactionDateTime = computed(() => {
         minute: "2-digit",
     }).format(date);
 });
+
+const printReceipt = () => {
+    if (!transactionResult.value) return;
+
+    window.print();
+};
 </script>
 
 <template>
@@ -249,105 +252,186 @@ const transactionDateTime = computed(() => {
                     Transaksi pelanggan berhasil diproses.
                 </p>
 
-                <div class="result-card">
+                <div
+                    class="result-card"
+                    :class="`receipt-paper-${receiptWidth}`"
+                >
+                    <!-- Header toko -->
                     <div class="receipt-header">
-                        <h2>UMKM AYAM JAGAL</h2>
-                        <p>Struk Transaksi Penjualan</p>
+                        <img
+                            src="/assets/images/illustrations/ilustrasi-koki.png"
+                            alt="Logo Ayam Jagal"
+                            class="receipt-logo"
+                        />
+
+                        <h2>AYAM JAGAL</h2>
+                        <p class="receipt-tagline">
+                            SAK WAREGE, SAK PEDESE, SAK KEMBUNGE
+                        </p>
+
+                        <div class="receipt-store-info">
+                            <p>
+                                Jl. Gotong Royong No.14, Jagalan,
+                                Kec. Jebres, Kota Surakarta,
+                                Jawa Tengah 57162
+                            </p>
+                            <p>Telp. 085859565758</p>
+                        </div>
                     </div>
 
-                    <div class="result-number">
-                        <span>Nomor Transaksi</span>
-                        <strong>{{ transactionNumber }}</strong>
+                    <div class="receipt-section-title">
+                        STRUK PEMBAYARAN
                     </div>
 
-                    <div class="receipt-date">
-                        <span>Tanggal</span>
-                        <strong>{{ transactionDateTime }}</strong>
-                    </div>
-
-                    <div class="result-divider"></div>
-
-                    <div
-                        v-for="(detail, index) in transactionDetails"
-                        :key="detail.id || index"
-                        class="result-item"
-                    >
-                        <div class="receipt-item-details">
-                            <strong>
-                                {{ detail.menu?.nama_menu || detail.menu?.name || detail.nama_menu || "Menu" }}
-                            </strong>
-
-                            <span>
-                                {{ formatRupiah(detail.harga_satuan || detail.price || 0) }}
-                                × {{ detail.jumlah || detail.quantity || 0 }}
-                            </span>
+                    <!-- Informasi transaksi -->
+                    <div class="receipt-meta">
+                        <div class="receipt-meta-row">
+                            <span>No. Transaksi</span>
+                            <strong>{{ transactionNumber }}</strong>
                         </div>
 
-                        <strong>
-                            {{ formatRupiah(detail.subtotal || 0) }}
-                        </strong>
+                        <div class="receipt-meta-row">
+                            <span>Tanggal</span>
+                            <strong>{{ transactionDateTime }}</strong>
+                        </div>
+
+                        <div class="receipt-meta-row">
+                            <span>Kasir</span>
+                            <strong>{{ cashierName }}</strong>
+                        </div>
                     </div>
 
-                    <div class="result-divider"></div>
+                    <div class="receipt-divider"></div>
 
-                    <div class="result-payment-row">
-                        <span>Metode Pembayaran</span>
-                        <strong>{{ paymentMethodLabel }}</strong>
+                    <!-- Daftar produk -->
+                    <div class="receipt-items">
+                        <div
+                            v-for="(detail, index) in transactionDetails"
+                            :key="detail.id || index"
+                            class="receipt-item"
+                        >
+                            <strong class="receipt-product-name">
+                                {{
+                                    detail.menu?.nama_menu ||
+                                    detail.menu?.name ||
+                                    detail.nama_menu ||
+                                    "Menu"
+                                }}
+                            </strong>
+
+                            <div class="receipt-item-calculation">
+                                <span>
+                                    {{ detail.jumlah || detail.quantity || 0 }}
+                                    x
+                                    {{
+                                        formatRupiah(
+                                            detail.harga_satuan ||
+                                            detail.price ||
+                                            0
+                                        )
+                                    }}
+                                </span>
+
+                                <strong>
+                                    {{ formatRupiah(detail.subtotal || 0) }}
+                                </strong>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="result-payment-row">
-                        <span>Total Pembayaran</span>
-                        <strong class="result-total">
-                            {{ formatRupiah(transactionResult.total_harga) }}
-                        </strong>
-                    </div>
+                    <div class="receipt-divider"></div>
 
-                    <template v-if="(transactionResult.metode_pembayaran || paymentMethod) === 'tunai'">
-                        <div class="result-payment-row">
-                            <span>Uang Diterima</span>
+                    <!-- Ringkasan pembayaran -->
+                    <div class="receipt-payment">
+                        <div class="receipt-payment-row">
+                            <span>Metode Pembayaran</span>
+                            <strong>{{ paymentMethodLabel }}</strong>
+                        </div>
+
+                        <div class="receipt-payment-row receipt-grand-total">
+                            <span>TOTAL</span>
                             <strong>
-                                {{ formatRupiah(transactionResult.uang_dibayarkan) }}
+                                {{
+                                    formatRupiah(
+                                        transactionResult.total_harga || 0
+                                    )
+                                }}
                             </strong>
                         </div>
 
-                        <div class="result-payment-row">
-                            <span>Uang Kembalian</span>
-                            <strong>
-                                {{ formatRupiah(transactionResult.kembalian) }}
-                            </strong>
-                        </div>
-                    </template>
+                        <template
+                            v-if="
+                                (transactionResult.metode_pembayaran ||
+                                    paymentMethod) === 'tunai'
+                            "
+                        >
+                            <div class="receipt-payment-row">
+                                <span>Uang Diterima</span>
+                                <strong>
+                                    {{
+                                        formatRupiah(
+                                            transactionResult.uang_dibayarkan ||
+                                            0
+                                        )
+                                    }}
+                                </strong>
+                            </div>
 
+                            <div class="receipt-payment-row">
+                                <span>Kembalian</span>
+                                <strong>
+                                    {{
+                                        formatRupiah(
+                                            transactionResult.kembalian || 0
+                                        )
+                                    }}
+                                </strong>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Footer struk -->
                     <div class="receipt-footer">
-                        <p>Terima kasih atas kunjungan Anda.</p>
+                        <p>Terima kasih telah berbelanja</p>
                         <strong>Selamat menikmati!</strong>
+                        <span>AYAM JAGAL - Surakarta</span>
                     </div>
                 </div>
 
-                <button
-                    type="button"
-                    class="print-receipt-button"
-                    @click="printReceipt"
-                >
-                    <svg viewBox="0 0 24 24" fill="none">
-                        <path
-                            d="M7 8V3H17V8M7 17H5C3.9 17 3 16.1 3 15V10C3 8.9 3.9 8 5 8H19C20.1 8 21 8.9 21 10V15C21 16.1 20.1 17 19 17H17M7 14H17V21H7V14Z"
-                            stroke="currentColor"
-                            stroke-width="1.7"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        />
-                    </svg>
-                    Cetak Struk
-                </button>
+                <!-- Pengaturan dan tombol cetak -->
+                <div class="receipt-actions">
+                    <label for="receipt-width">Ukuran kertas struk</label>
 
-                <button
-                    type="button"
-                    class="new-transaction-button"
-                    @click="startNewTransaction"
-                >
-                    Buat Transaksi Baru
-                </button>
+                    <select id="receipt-width" v-model="receiptWidth">
+                        <option value="58">Thermal 58 mm</option>
+                        <option value="80">Thermal 80 mm</option>
+                    </select>
+
+                    <button
+                        type="button"
+                        class="print-receipt-button"
+                        @click="printReceipt"
+                    >
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path
+                                d="M7 8V3H17V8M7 17H5C3.9 17 3 16.1 3 15V10C3 8.9 3.9 8 5 8H19C20.1 8 21 8.9 21 10V15C21 16.1 20.1 17 19 17H17M7 14H17V21H7V14Z"
+                                stroke="currentColor"
+                                stroke-width="1.7"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                        </svg>
+                        Cetak Struk
+                    </button>
+
+                    <button
+                        type="button"
+                        class="new-transaction-button"
+                        @click="startNewTransaction"
+                    >
+                        Buat Transaksi Baru
+                    </button>
+                </div>
             </section>
         </main>
 
@@ -471,6 +555,7 @@ const transactionDateTime = computed(() => {
     padding-left: 20px;
 }
 
+/* Halaman transaksi berhasil */
 .transaction-result {
     width: 100%;
     max-width: 560px;
@@ -512,140 +597,246 @@ const transactionDateTime = computed(() => {
     font-size: 13px;
 }
 
+/* Desain struk */
 .result-card {
     width: 100%;
+    max-width: 390px;
     margin-top: 25px;
-    padding: 24px;
+    padding: 25px 22px;
     border: 1px solid #e9eaed;
-    border-radius: 16px;
+    border-radius: 12px;
     background: #ffffff;
+    color: #222222;
     text-align: left;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.035);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.045);
 }
 
-
 .receipt-header {
+    padding-bottom: 16px;
     text-align: center;
-    padding-bottom: 18px;
+}
+
+.receipt-logo {
+    display: block;
+    width: 65px;
+    height: 65px;
+    margin: 0 auto 8px;
+    object-fit: contain;
 }
 
 .receipt-header h2 {
     margin: 0;
     color: #ca0708;
-    font-size: 20px;
+    font-size: 23px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+}
+
+.receipt-tagline {
+    margin: 4px 0 12px;
+    color: #555555;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+}
+
+.receipt-store-info {
+    max-width: 310px;
+    margin: 0 auto;
+    color: #555555;
+    font-size: 10px;
+    line-height: 1.55;
+}
+
+.receipt-store-info p {
+    margin: 2px 0;
+}
+
+.receipt-section-title {
+    padding: 9px 0;
+    border-top: 1px dashed #999999;
+    border-bottom: 1px dashed #999999;
+    text-align: center;
+    font-size: 11px;
     font-weight: 800;
-    letter-spacing: 1px;
+    letter-spacing: 1.3px;
 }
 
-.receipt-header p {
-    margin: 5px 0 0;
-    color: #777;
-    font-size: 12px;
+.receipt-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 13px 0;
 }
 
-.receipt-date {
+.receipt-meta-row {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
     gap: 12px;
-    margin-top: 12px;
-    font-size: 12px;
+    font-size: 10px;
+    line-height: 1.5;
 }
 
-.receipt-date strong {
+.receipt-meta-row span {
+    flex-shrink: 0;
+    color: #666666;
+}
+
+.receipt-meta-row strong {
+    max-width: 65%;
     text-align: right;
+    overflow-wrap: anywhere;
 }
 
-.receipt-item-details {
+.receipt-divider {
+    width: 100%;
+    border-top: 1px dashed #999999;
+    margin: 5px 0 13px;
+}
+
+.receipt-items {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+    padding: 2px 0 12px;
+}
+
+.receipt-item {
     display: flex;
     flex-direction: column;
     gap: 5px;
 }
 
-.receipt-item-details span {
-    color: #777;
+.receipt-product-name {
+    color: #222222;
+    font-size: 11px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.receipt-item-calculation {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 10px;
+}
+
+.receipt-item-calculation span {
+    color: #555555;
+}
+
+.receipt-item-calculation strong {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.receipt-payment {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    padding: 2px 0;
+}
+
+.receipt-payment-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.receipt-payment-row span {
+    color: #555555;
+}
+
+.receipt-payment-row strong {
+    text-align: right;
+}
+
+.receipt-grand-total {
+    align-items: center;
+    margin: 3px 0;
+    padding: 11px 0;
+    border-top: 1px dashed #999999;
+    border-bottom: 1px dashed #999999;
     font-size: 12px;
+    font-weight: 800;
+}
+
+.receipt-grand-total span {
+    color: #222222;
+    font-weight: 800;
+}
+
+.receipt-grand-total strong {
+    color: #ca0708;
+    font-size: 17px;
+    font-weight: 900;
 }
 
 .receipt-footer {
-    margin-top: 22px;
-    padding-top: 16px;
-    border-top: 1px dashed #ddd;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px dashed #999999;
     text-align: center;
 }
 
 .receipt-footer p {
-    margin: 0 0 5px;
-    color: #777;
-    font-size: 12px;
-}
-
-.receipt-footer strong {
-    font-size: 13px;
-}
-.result-number {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-}
-
-.result-number span,
-.result-payment-row span {
-    color: #888888;
-    font-size: 12px;
-}
-
-.result-number strong {
-    color: #ca0708;
-    font-size: 16px;
-}
-
-.result-divider {
-    height: 1px;
-    margin: 18px 0;
-    background: #eeeeee;
-}
-
-.result-item,
-.result-payment-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 13px;
-}
-
-.result-item:last-child,
-.result-payment-row:last-child {
-    margin-bottom: 0;
-}
-
-.result-item > div {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.result-item strong,
-.result-payment-row strong {
+    margin: 0;
     color: #333333;
-    font-size: 13px;
-}
-
-.result-item span {
-    color: #888888;
     font-size: 11px;
 }
 
-.result-payment-row .result-total {
-    color: #ca0708;
-    font-size: 19px;
-    font-weight: 800;
+.receipt-footer strong {
+    font-size: 12px;
+}
+
+.receipt-footer span {
+    margin-top: 5px;
+    color: #777777;
+    font-size: 9px;
+    letter-spacing: 0.5px;
+}
+
+/* Pengaturan cetak */
+.receipt-actions {
+    width: 100%;
+    max-width: 390px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    text-align: left;
+}
+
+.receipt-actions label {
+    color: #555555;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.receipt-actions select {
+    width: 100%;
+    min-height: 43px;
+    padding: 0 12px;
+    border: 1px solid #dedede;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #333333;
+    font-family: inherit;
+    font-size: 13px;
 }
 
 .print-receipt-button {
     width: 100%;
     min-height: 48px;
-    margin-top: 20px;
+    margin-top: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -673,7 +864,7 @@ const transactionDateTime = computed(() => {
 .new-transaction-button {
     width: 100%;
     min-height: 48px;
-    margin-top: 20px;
+    margin-top: 5px;
     border: none;
     border-radius: 10px;
     color: #ffffff;
@@ -736,7 +927,7 @@ const transactionDateTime = computed(() => {
     }
 
     .result-card {
-        padding: 18px;
+        padding: 20px 17px;
     }
 
     .transaction-result h1 {
@@ -760,10 +951,26 @@ const transactionDateTime = computed(() => {
     }
 }
 
+/*
+ * Named page untuk ukuran printer thermal.
+ * Pilihan ukuran di atas struk menentukan halaman yang digunakan.
+ */
+@page receipt58 {
+    size: 58mm auto;
+    margin: 2mm;
+}
+
+@page receipt80 {
+    size: 80mm auto;
+    margin: 3mm;
+}
+
 @media print {
-    @page {
-        size: 80mm auto;
-        margin: 4mm;
+    :global(html),
+    :global(body) {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
     }
 
     :global(body *) {
@@ -791,6 +998,7 @@ const transactionDateTime = computed(() => {
     .result-success-icon,
     .result-eyebrow,
     .result-description,
+    .receipt-actions,
     .print-receipt-button,
     .new-transaction-button {
         display: none !important;
@@ -798,20 +1006,85 @@ const transactionDateTime = computed(() => {
 
     .result-card {
         width: 100%;
+        max-width: none;
         margin: 0;
         padding: 0;
         border: none;
         border-radius: 0;
         box-shadow: none;
+        color: #000000;
+        background: #ffffff;
     }
 
-    .result-item,
-    .result-payment-row {
+    .receipt-paper-58 {
+        page: receipt58;
+        width: 54mm !important;
+    }
+
+    .receipt-paper-80 {
+        page: receipt80;
+        width: 74mm !important;
+    }
+
+    .receipt-header,
+    .receipt-meta,
+    .receipt-items,
+    .receipt-payment,
+    .receipt-footer {
         break-inside: avoid;
+    }
+
+    .receipt-header h2,
+    .receipt-grand-total strong {
+        color: #000000 !important;
+    }
+
+    .receipt-logo {
+        width: 48px;
+        height: 48px;
+        filter: grayscale(1);
+    }
+
+    .receipt-header h2 {
+        font-size: 17px;
+    }
+
+    .receipt-tagline {
+        font-size: 8px;
+    }
+
+    .receipt-store-info {
+        font-size: 8px;
+    }
+
+    .receipt-section-title {
+        font-size: 9px;
+    }
+
+    .receipt-meta-row,
+    .receipt-item-calculation,
+    .receipt-payment-row {
+        font-size: 9px;
+    }
+
+    .receipt-product-name {
+        font-size: 10px;
+    }
+
+    .receipt-grand-total strong {
+        font-size: 14px;
+    }
+
+    .receipt-footer p {
+        font-size: 9px;
+    }
+
+    .receipt-footer strong {
+        font-size: 10px;
+    }
+
+    .receipt-footer span {
+        font-size: 8px;
     }
 }
 </style>
-
-
-
-
