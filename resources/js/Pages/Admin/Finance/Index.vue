@@ -92,7 +92,7 @@ const {
     summary,
     formatRupiah,
     resetFilter,
-} = useFinanceReport(props.summary, props.filters);
+} = useFinanceReport(props);
 
 // DATA AVAILABILITY
 const hasFinanceData = computed(() => {
@@ -104,15 +104,53 @@ const hasFinanceData = computed(() => {
 });
 
 // FILTER HANDLERS
+const applyFilters = () => {
+    const params = {
+        period: selectedPeriod.value,
+    };
+
+    // Kirim tanggal khusus jika keduanya sudah dipilih.
+    if (startDate.value && endDate.value) {
+        params.start_date = startDate.value;
+        params.end_date = endDate.value;
+    }
+
+    router.get("/finance", params, {
+        preserveState: true,
+        preserveScroll: true,
+        replace: true,
+    });
+};
+
 const changePeriod = (period) => {
     selectedPeriod.value = period;
     startDate.value = "";
     endDate.value = "";
+
+    applyFilters();
+};
+
+const handleStartDateChange = (value) => {
+    startDate.value = value;
+
+    if (startDate.value && endDate.value) {
+        applyFilters();
+    }
+};
+
+const handleEndDateChange = (value) => {
+    endDate.value = value;
+
+    if (startDate.value && endDate.value) {
+        applyFilters();
+    }
 };
 
 const handleResetFilter = () => {
     resetFilter();
+    applyFilters();
 };
+
 </script>
 
 <template>
@@ -145,11 +183,10 @@ const handleResetFilter = () => {
                     :start-date="startDate"
                     :end-date="endDate"
                     @change-period="changePeriod"
-                    @update:start-date="startDate = $event"
-                    @update:end-date="endDate = $event"
+                    @update:start-date="handleStartDateChange"
+                    @update:end-date="handleEndDateChange"
                     @reset="handleResetFilter"
                 />
-
                 <!-- SUMMARY -->
                 <FinanceSummary
                     v-if="hasFinanceData"

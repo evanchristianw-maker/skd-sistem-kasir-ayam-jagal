@@ -1,15 +1,26 @@
-﻿import { ref, computed } from "vue";
+﻿import { ref, computed, watch } from "vue";
 
-export default function useFinanceReport(initialSummary = {}, initialFilters = {}) {
-    const selectedPeriod = ref(initialFilters.period || "7d");
-    const startDate = ref(initialFilters.start_date || "");
-    const endDate = ref(initialFilters.end_date || "");
+export default function useFinanceReport(props = {}) {
+    const selectedPeriod = ref(props.filters?.period || "7d");
+    const startDate = ref(props.filters?.start_date || "");
+    const endDate = ref(props.filters?.end_date || "");
 
+    // Mengikuti perubahan props dari Laravel/Inertia.
     const summary = computed(() => ({
-        total_income: Number(initialSummary.total_income) || 0,
-        total_expense: Number(initialSummary.total_expense) || 0,
-        net_profit: Number(initialSummary.net_profit) || 0,
+        total_income: Number(props.summary?.total_income) || 0,
+        total_expense: Number(props.summary?.total_expense) || 0,
+        net_profit: Number(props.summary?.net_profit) || 0,
     }));
+
+    watch(
+        () => props.filters,
+        (filters) => {
+            selectedPeriod.value = filters?.period || "7d";
+            startDate.value = filters?.start_date || "";
+            endDate.value = filters?.end_date || "";
+        },
+        { deep: true },
+    );
 
     const formatRupiah = (value) => {
         return new Intl.NumberFormat("id-ID", {

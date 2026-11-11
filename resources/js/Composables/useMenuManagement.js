@@ -32,6 +32,7 @@ export default function useMenuManagement(initialMenus = []) {
         price: "",
         description: "",
         image: "",
+        imageFile: null,
     });
 
     const form = ref(emptyForm());
@@ -119,6 +120,7 @@ export default function useMenuManagement(initialMenus = []) {
             price: menu.price ?? "",
             description: menu.description ?? "",
             image: menu.image ?? "",
+            imageFile: null,
         };
 
         showModal.value = true;
@@ -134,15 +136,18 @@ export default function useMenuManagement(initialMenus = []) {
             return;
         }
 
-        // Sesuaikan dengan field yang diterima MenuController.php
+        // DATA YANG DIKIRIM KE LARAVEL
         const data = {
             nama_menu: name,
+            deskripsi: form.value.description,
             kategori: form.value.category,
             harga: price,
+            gambar: form.value.imageFile,
         };
 
         const options = {
             preserveScroll: true,
+            forceFormData: true,
 
             onSuccess: (response) => {
                 sync(response);
@@ -158,7 +163,15 @@ export default function useMenuManagement(initialMenus = []) {
         };
 
         if (isEditing.value) {
-            router.put(`/menu/${selectedMenuId.value}`, data, options);
+            // POST + METHOD SPOOFING AGAR UPLOAD FILE PADA UPDATE BERJALAN
+            router.post(
+                `/menu/${selectedMenuId.value}`,
+                {
+                    ...data,
+                    _method: "put",
+                },
+                options,
+            );
         } else {
             router.post("/menu", data, options);
         }
@@ -212,20 +225,34 @@ export default function useMenuManagement(initialMenus = []) {
         );
     }
 
-    // IMAGE UPLOAD PREVIEW
+    // IMAGE UPLOAD
     function handleImageUpload(event) {
         const file = event.target.files?.[0];
 
         if (!file) return;
 
-        if (!file.type.startsWith("image/")) {
-            window.alert("File harus berupa gambar.");
+        // VALIDASI FORMAT
+        const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+
+        if (!allowedTypes.includes(file.type)) {
+            window.alert("Format gambar harus JPG, PNG, atau WEBP.");
+            event.target.value = "";
+            return;
+        }
+
+        // VALIDASI UKURAN MAKSIMAL 2 MB
+        if (file.size > 2 * 1024 * 1024) {
+            window.alert("Ukuran gambar maksimal 2 MB.");
             event.target.value = "";
             return;
         }
 
         clearImagePreview();
 
+        // SIMPAN FILE ASLI UNTUK DIKIRIM KE LARAVEL
+        form.value.imageFile = file;
+
+        // BUAT PREVIEW GAMBAR
         form.value.image = URL.createObjectURL(file);
     }
 
