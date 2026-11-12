@@ -5,6 +5,7 @@ use App\Http\Controllers\TransaksiController;
 use App\Http\Controllers\LaporanPenjualanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
+use App\Http\Controllers\NotificationController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -83,4 +84,18 @@ Route::middleware(['auth', 'role:kasir'])->group(function () {
     Route::post('/transaksi', [TransaksiController::class, 'store'])
         ->name('transaksi.store');
 });
+Route::middleware(['auth', 'role:admin,kasir'])
+    ->prefix('notifications')
+    ->name('notifications.')
+    ->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])
+            ->name('index');
+
+        Route::patch('/{id}/read', [NotificationController::class, 'markAsRead'])
+            ->name('read');
+
+        Route::delete('/{id}', [NotificationController::class, 'destroy'])
+            ->name('destroy');
+    });
+
 require __DIR__.'/auth.php';

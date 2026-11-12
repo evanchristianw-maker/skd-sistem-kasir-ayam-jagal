@@ -21,6 +21,8 @@ export default function useMenuManagement(initialMenus = []) {
     const isEditing = ref(false);
 
     const selectedMenuId = ref(null);
+    const actionType = ref('delete');
+    const actionError = ref("");
 
     // CATEGORY
     const categories = ["Semua", "Makanan", "Minuman", "Paket", "Tambahan"];
@@ -177,54 +179,49 @@ export default function useMenuManagement(initialMenus = []) {
         }
     }
 
-    // OPEN DELETE MODAL
+    // OPEN DELETE / STATUS CONFIRMATION MODAL
     function confirmDelete(menu) {
         selectedMenuId.value = menu.id;
+        actionType.value = "delete";
+        actionError.value = "";
         showDeleteModal.value = true;
     }
 
-    // DELETE MENU
-    function deleteMenu() {
+    function confirmToggleStatus(menu) {
+        selectedMenuId.value = menu.id;
+        actionType.value = menu.status ? "deactivate" : "activate";
+        actionError.value = "";
+        showDeleteModal.value = true;
+    }
+
+    // EXECUTE CONFIRMED ACTION
+    function confirmAction() {
         if (!selectedMenuId.value) return;
 
-        router.delete(`/menu/${selectedMenuId.value}`, {
+        const options = {
             preserveScroll: true,
 
             onSuccess: (response) => {
                 sync(response);
-
                 showDeleteModal.value = false;
                 selectedMenuId.value = null;
             },
 
             onError: (errors) => {
-                console.error("Gagal menghapus menu:", errors);
+                console.error("Gagal memproses menu:", errors);
 
-                const message =
-                    errors.menu || "Menu gagal dihapus. Silakan coba lagi.";
-
-                window.alert(message);
+                actionError.value = errors.menu ||
+                    "Aksi menu gagal diproses. Silakan coba lagi.";
             },
-        });
+        };
+
+        if (actionType.value === "delete") {
+            router.delete(`/menu/${selectedMenuId.value}`, options);
+            return;
+        }
+
+        router.patch(`/menu/${selectedMenuId.value}/status`, {}, options);
     }
-
-    // TOGGLE MENU STATUS
-    function toggleStatus(menu) {
-        router.patch(
-            `/menu/${menu.id}/status`,
-            {},
-            {
-                preserveScroll: true,
-
-                onSuccess: sync,
-
-                onError: (errors) => {
-                    console.error("Gagal mengubah status menu:", errors);
-                },
-            },
-        );
-    }
-
     // IMAGE UPLOAD
     function handleImageUpload(event) {
         const file = event.target.files?.[0];
@@ -264,6 +261,8 @@ export default function useMenuManagement(initialMenus = []) {
 
         showModal,
         showDeleteModal,
+        actionType,
+        actionError,
         isEditing,
 
         categories,
@@ -282,9 +281,8 @@ export default function useMenuManagement(initialMenus = []) {
         saveMenu,
 
         confirmDelete,
-        deleteMenu,
-        toggleStatus,
-
+        confirmToggleStatus,
+        confirmAction,
         handleImageUpload,
     };
 }

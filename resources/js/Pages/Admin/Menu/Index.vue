@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { ref, computed } from "vue";
 import { router, usePage } from "@inertiajs/vue3";
 
@@ -59,6 +59,8 @@ const {
     selectedCategory,
     showModal,
     showDeleteModal,
+    actionType,
+    actionError,
     isEditing,
     categories,
     form,
@@ -72,8 +74,8 @@ const {
     openEditModal,
     saveMenu,
     confirmDelete,
-    deleteMenu,
-    toggleStatus,
+    confirmToggleStatus,
+    confirmAction,
     handleImageUpload,
 } = useMenuManagement(props.menus);
 </script>
@@ -138,7 +140,7 @@ const {
                     :format-price="formatPrice"
                     @edit="openEditModal"
                     @delete="confirmDelete"
-                    @toggle-status="toggleStatus"
+                    @toggle-status="confirmToggleStatus"
                 />
 
                 <!-- FOOTER -->
@@ -170,7 +172,9 @@ const {
         <!-- DELETE CONFIRMATION MODAL -->
         <MenuDeleteModal
             :show-delete-modal="showDeleteModal"
-            :delete-menu="deleteMenu"
+            :action-type="actionType"
+            :action-error="actionError"
+            :confirm-action="confirmAction"
             @close="showDeleteModal = false"
         />
 

@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 defineProps({
     transactions: {
         type: Array,
@@ -29,7 +29,6 @@ defineProps({
                 <thead>
                     <tr>
                         <th scope="col">Tanggal</th>
-                        <th scope="col">Keterangan</th>
                         <th scope="col">Kategori</th>
                         <th scope="col">Jenis</th>
                         <th scope="col">Jumlah</th>
@@ -39,7 +38,6 @@ defineProps({
                 <tbody>
                     <tr v-for="transaction in transactions" :key="transaction.id">
                         <td>{{ transaction.date || '-' }}</td>
-                        <td>{{ transaction.description || '-' }}</td>
                         <td>{{ transaction.category || '-' }}</td>
                         <td>
                             <span class="finance-type-badge" :class="transaction.type">

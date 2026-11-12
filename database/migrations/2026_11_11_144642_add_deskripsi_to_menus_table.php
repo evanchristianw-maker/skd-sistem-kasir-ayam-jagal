@@ -8,15 +8,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('menus', function (Blueprint $table) {
-            $table->text('deskripsi')->nullable()->after('nama_menu');
-        });
+        if (!Schema::hasColumn('menus', 'deskripsi')) {
+            Schema::table('menus', function (Blueprint $table) {
+                $table->text('deskripsi')->nullable()->after('nama_menu');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::table('menus', function (Blueprint $table) {
-            $table->dropColumn('deskripsi');
-        });
+        // Tidak menghapus kolom karena kolom deskripsi sudah ada sebelumnya.
     }
 };

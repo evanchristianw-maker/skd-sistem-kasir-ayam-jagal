@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Menu;
 use App\Models\Transaksi;
+use App\Models\User;
+use App\Notifications\TransactionCompleted;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -152,7 +154,22 @@ class TransaksiController extends Controller
             return $transaksi;
         });
 
-        // 8. Kembalikan hasil transaksi
+        // 8. Kirim notifikasi ke seluruh akun Admin dan Kasir
+        $notificationData = [
+            'nomor_transaksi' => $transaksi->nomor_transaksi,
+            'total_harga' => $transaksi->total_harga,
+            'nama_kasir' => $request->user()->nama_lengkap,
+            'metode_pembayaran' => $transaksi->metode_pembayaran,
+            'waktu_transaksi' => $transaksi->created_at?->toIso8601String(),
+        ];
+
+        User::whereIn('role', ['admin', 'kasir'])
+            ->get()
+            ->each(function ($user) use ($notificationData) {
+                $user->notify(new TransactionCompleted($notificationData));
+            });
+
+        // 9. Kembalikan hasil transaksi
         return response()->json([
             'message' => 'Transaksi berhasil dibuat.',
             'data' => $transaksi->load('detailTransaksis.menu'),
