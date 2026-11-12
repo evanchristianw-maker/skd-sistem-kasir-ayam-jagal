@@ -172,19 +172,18 @@ const submit = () => {
 </template>
 
 <style scoped>
-/* Mengatur keseluruhan form */
 .login-form {
     width: 100%;
+    min-width: 0;
 }
 
-/* Mengatur judul selamat datang */
 .welcome-heading {
     margin-bottom: 24px;
 }
 
 .welcome-heading h2 {
-    font-size: 25px;
-    line-height: 31px;
+    font-size: clamp(22px, 5vw, 25px);
+    line-height: 1.25;
     font-weight: 700;
     color: #111111;
     margin: 0;
@@ -194,19 +193,19 @@ const submit = () => {
     font-size: 12px;
     line-height: 16px;
     color: #929292;
-    margin-top: 2px;
+    margin-top: 4px;
 }
 
-/* Mengatur kelompok input */
 .form-group {
     width: 100%;
+    min-width: 0;
 }
 
 .form-group label {
     display: block;
     color: #111111;
     font-size: 12px;
-    margin: 0 0 5px 6px;
+    margin: 0 0 6px 6px;
 }
 
 .username-group {
@@ -217,36 +216,35 @@ const submit = () => {
     margin-bottom: 18px;
 }
 
-/* Mengatur kotak input */
 .login-input {
+    display: block;
+    box-sizing: border-box;
     width: 100%;
-    height: 36px;
+    min-width: 0;
+    height: 42px;
     border: 1px solid #c9c9c9;
     border-radius: 9px;
     background: #ffffff;
     padding: 0 12px;
     font-size: 14px;
     color: #222222;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.18);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
     outline: none;
-    transition:
-        border-color 0.2s,
-        box-shadow 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-/* Mengatur kondisi input ketika dipilih */
 .login-input:focus {
     border-color: #ca0708;
     box-shadow: 0 0 0 2px rgba(202, 7, 8, 0.1);
 }
 
-/* Mengatur tombol tampil password */
 .password-wrapper {
     position: relative;
+    width: 100%;
 }
 
 .password-wrapper .login-input {
-    padding-right: 40px;
+    padding-right: 42px;
 }
 
 .password-toggle {
@@ -254,8 +252,8 @@ const submit = () => {
     right: 11px;
     top: 50%;
     transform: translateY(-50%);
-    width: 22px;
-    height: 22px;
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -271,34 +269,36 @@ const submit = () => {
     height: 20px;
 }
 
-/* Mengatur checkbox dan lupa password */
 .form-options {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 7px;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 0 4px;
     margin-top: 18px;
 }
 
 .remember-label {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 9px;
     font-size: 12px;
     color: #666666;
     cursor: pointer;
 }
 
-/* Mengatur checkbox merah */
 .remember-checkbox {
     appearance: none;
-    width: 22px;
-    height: 22px;
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
     border: 1px solid #cccccc;
     border-radius: 6px;
     background: #ffffff;
     cursor: pointer;
     position: relative;
+    margin: 0;
 }
 
 .remember-checkbox:checked {
@@ -309,8 +309,8 @@ const submit = () => {
 .remember-checkbox:checked::after {
     content: "";
     position: absolute;
-    left: 7px;
-    top: 2px;
+    left: 6px;
+    top: 1px;
     width: 5px;
     height: 11px;
     border: solid #ffffff;
@@ -318,7 +318,6 @@ const submit = () => {
     transform: rotate(45deg);
 }
 
-/* Mengatur tautan lupa password */
 .forgot-link {
     color: #ca0708;
     font-size: 12px;
@@ -330,12 +329,12 @@ const submit = () => {
     text-decoration: underline;
 }
 
-/* Mengatur tombol login */
 .login-button {
-    width: 78%;
-    height: 38px;
+    width: 100%;
+    max-width: 320px;
+    min-height: 44px;
     display: block;
-    margin: 22px auto 0;
+    margin: 24px auto 0;
     border: none;
     border-radius: 9px;
     background: linear-gradient(180deg, #ff0909 0%, #d90000 100%);
@@ -343,10 +342,8 @@ const submit = () => {
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.25);
-    transition:
-        transform 0.2s,
-        opacity 0.2s;
+    box-shadow: 0 3px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, opacity 0.2s;
 }
 
 .login-button:hover {
@@ -358,14 +355,19 @@ const submit = () => {
     cursor: not-allowed;
 }
 
-/* Menyesuaikan form pada HP kecil */
-@media (max-width: 380px) {
-    .welcome-heading h2 {
-        font-size: 23px;
+@media (max-width: 360px) {
+    .form-options {
+        padding: 0;
+        gap: 8px;
+    }
+
+    .remember-label,
+    .forgot-link {
+        font-size: 11px;
     }
 
     .login-button {
-        width: 85%;
+        max-width: none;
     }
 }
 </style>

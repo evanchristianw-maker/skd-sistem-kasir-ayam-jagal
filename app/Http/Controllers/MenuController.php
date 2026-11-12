@@ -115,18 +115,6 @@ class MenuController extends Controller
      */
     public function destroy(Menu $menu)
     {
-        // Menu yang sudah digunakan dalam transaksi tidak boleh dihapus.
-        if ($menu->detailTransaksis()->exists()) {
-            return back()->withErrors([
-                'menu' => 'Menu tidak dapat dihapus karena sudah digunakan dalam transaksi.',
-            ]);
-        }
-
-        // Hapus file gambar jika tersedia.
-        if ($menu->gambar) {
-            Storage::disk('public')->delete($menu->gambar);
-        }
-
         $menu->delete();
 
         return redirect()

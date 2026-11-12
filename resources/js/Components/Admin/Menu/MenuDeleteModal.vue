@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { ref, watch, nextTick, onBeforeUnmount } from "vue";
 
 const props = defineProps({
@@ -6,7 +6,15 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
-    deleteMenu: {
+    actionType: {
+        type: String,
+        default: "delete",
+    },
+    actionError: {
+        type: String,
+        default: "",
+    },
+    confirmAction: {
         type: Function,
         required: true,
     },
@@ -100,22 +108,51 @@ onBeforeUnmount(() => {
                 tabindex="-1"
             >
                 <div class="delete-icon" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" fill="none">
-                        <path
-                            d="M3 6H21M8 6V4H16V6M19 6L18 20H6L5 6M10 11V16M14 11V16"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                        />
-                    </svg>
-                </div>
+    <svg
+        v-if="actionType === 'delete'"
+        viewBox="0 0 24 24"
+        fill="none"
+    >
+        <path
+            d="M3 6H21M8 6V4H16V6M19 6L18 20H6L5 6M10 11V16M14 11V16"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+        />
+    </svg>
 
-                <h2 id="delete-title">Hapus Menu?</h2>
+    <svg
+        v-else
+        viewBox="0 0 24 24"
+        fill="none"
+    >
+        <rect
+            x="3"
+            y="6"
+            width="18"
+            height="12"
+            rx="6"
+            stroke="currentColor"
+            stroke-width="1.8"
+        />
+        <circle
+            :cx="actionType === 'deactivate' ? 15 : 9"
+            cy="12"
+            r="3"
+            fill="currentColor"
+        />
+    </svg>
+</div>
+
+                <h2 id="delete-title">{{ actionType === "delete" ? "Hapus Menu?" : actionType === "deactivate" ? "Nonaktifkan Menu?" : "Aktifkan Menu?" }}</h2>
 
                 <p id="delete-description">
-                    Menu yang dihapus tidak dapat dikembalikan. Apakah Anda
-                    yakin ingin melanjutkan?
+                    {{ actionType === "delete" ? "Menu yang dihapus tidak dapat dikembalikan. Apakah Anda yakin ingin melanjutkan?" : actionType === "deactivate" ? "Apakah Anda yakin ingin menonaktifkan menu ini? Menu tidak akan ditampilkan kepada kasir." : "Apakah Anda yakin ingin mengaktifkan kembali menu ini? Menu akan ditampilkan kembali kepada kasir." }}
+                </p>
+
+                <p v-if="actionError" class="action-error" role="alert">
+                    {{ actionError }}
                 </p>
 
                 <div class="modal-actions">
@@ -130,9 +167,9 @@ onBeforeUnmount(() => {
                     <button
                         type="button"
                         class="danger-button"
-                        @click="deleteMenu"
+                        @click="confirmAction"
                     >
-                        Ya, Hapus
+                        {{ actionType === "delete" ? "Ya, Hapus" : actionType === "deactivate" ? "Ya, Nonaktifkan" : "Ya, Aktifkan" }}
                     </button>
                 </div>
             </section>
@@ -141,6 +178,17 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.action-error {
+    margin: 12px 0 0;
+    padding: 11px 13px;
+    border: 1px solid #fecaca;
+    border-radius: 9px;
+    color: #b91c1c;
+    background: #fef2f2;
+    font-size: 12px;
+    line-height: 1.6;
+    text-align: left;
+}
 .modal-overlay {
     position: fixed;
     inset: 0;

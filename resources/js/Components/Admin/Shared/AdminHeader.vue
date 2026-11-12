@@ -1,5 +1,6 @@
-﻿<script setup>
+<script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
+import useNotifications from "@/Composables/useNotifications";
 
 defineProps({
     adminName: {
@@ -21,15 +22,22 @@ const emit = defineEmits(["logout-request"]);
 const showingProfileMenu = ref(false);
 const showingNotifications = ref(false);
 
-const notifications = [
-    {
-        title: "Selamat datang",
-        message: "Selamat bekerja di Dashboard UMKM Ayam Jagal.",
-        time: "Informasi sistem",
-    },
-];
-
-const notificationCount = notifications.length;
+const {
+    notifications,
+    unreadCount: notificationCount,
+    isLoading: notificationsLoading,
+    processingId,
+    errorMessage: notificationError,
+    markAsRead,
+    deleteNotification,
+} = useNotifications();
+const formatCurrency = (value) => {
+    return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        maximumFractionDigits: 0,
+    }).format(Number(value ?? 0));
+};
 
 const openProfileMenu = () => {
     showingNotifications.value = false;
@@ -245,10 +253,26 @@ onBeforeUnmount(() => {
                         <span>{{ notificationCount }} informasi</span>
                     </div>
 
+                    <p v-if="notificationError" class="notification-error">
+                        {{ notificationError }}
+                    </p>
+
+                    <p v-if="notificationsLoading && !notifications.length" class="notification-empty">
+                        Memuat notifikasi...
+                    </p>
+
                     <div
-                        v-for="(notification, index) in notifications"
-                        :key="index"
+                        v-else-if="!notifications.length"
+                        class="notification-empty"
+                    >
+                        Belum ada notifikasi transaksi.
+                    </div>
+
+                    <div
+                        v-for="notification in notifications"
+                        :key="notification.id"
                         class="notification-item"
+                        :class="{ 'notification-unread': !notification.read_at }"
                     >
                         <div class="notification-icon">
                             <svg viewBox="0 0 24 24" fill="none">
@@ -262,9 +286,55 @@ onBeforeUnmount(() => {
                         </div>
 
                         <div class="notification-content">
-                            <strong>{{ notification.title }}</strong>
-                            <p>{{ notification.message }}</p>
-                            <span>{{ notification.time }}</span>
+                            <div class="notification-title-row">
+                                <strong>{{ notification.data.title }}</strong>
+                                <span v-if="!notification.read_at" class="notification-dot"></span>
+                            </div>
+
+                            <p>{{ notification.data.message }}</p>
+
+                            <div class="notification-details">
+                                <span>
+                                    No. Transaksi:
+                                    <strong>{{ notification.data.nomor_transaksi }}</strong>
+                                </span>
+                                <span>
+                                    Total:
+                                    <strong>{{ formatCurrency(notification.data.total_harga) }}</strong>
+                                </span>
+                                <span>
+                                    Kasir:
+                                    <strong>{{ notification.data.nama_kasir }}</strong>
+                                </span>
+                                <span>
+                                    Pembayaran:
+                                    <strong>{{ notification.data.metode_pembayaran?.toUpperCase() }}</strong>
+                                </span>
+                            </div>
+
+                            <span class="notification-time">{{ notification.time }}</span>
+
+                            <div class="notification-actions">
+                                <button
+                                    v-if="!notification.read_at"
+                                    type="button"
+                                    class="notification-read-button"
+                                    :disabled="processingId === notification.id"
+                                    @click="markAsRead(notification.id)"
+                                >
+                                    Tandai Dibaca
+                                </button>
+
+                                <button
+                                    v-else
+                                    type="button"
+                                    class="notification-delete-button"
+                                    :disabled="processingId === notification.id"
+                                    @click="deleteNotification(notification.id)"
+                                >
+                                    Hapus
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -601,6 +671,96 @@ onBeforeUnmount(() => {
     font-size: 11px;
 }
 
+.notification-unread {
+    background: #fffafa;
+}
+
+.notification-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.notification-dot {
+    width: 8px;
+    height: 8px;
+    flex: 0 0 8px;
+    border-radius: 50%;
+    background: #ca0708;
+}
+
+.notification-details {
+    display: grid;
+    gap: 5px;
+    margin: 10px 0;
+    color: #777777;
+    font-size: 11px;
+}
+
+.notification-details strong {
+    color: #333333;
+    font-weight: 600;
+}
+
+.notification-time {
+    display: block;
+    margin-top: 8px;
+    color: #999999;
+    font-size: 11px;
+}
+
+.notification-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+}
+
+.notification-read-button,
+.notification-delete-button {
+    padding: 7px 11px;
+    border: 1px solid #f0cccc;
+    border-radius: 8px;
+    color: #ca0708;
+    background: #fff3f3;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.notification-read-button:hover,
+.notification-delete-button:hover {
+    background: #ffe5e5;
+}
+
+.notification-read-button:disabled,
+.notification-delete-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.notification-empty {
+    padding: 22px 8px;
+    color: #888888;
+    text-align: center;
+    font-size: 13px;
+}
+
+.notification-error {
+    margin: 0 0 12px;
+    color: #ca0708;
+    font-size: 12px;
+}
+
+.notification-content {
+    min-width: 0;
+    flex: 1;
+}
+
+.notification-dropdown {
+    max-height: min(75vh, 600px);
+    overflow-y: auto;
+}
 .popup-enter-active,
 .popup-leave-active {
     transition: opacity 0.2s ease;
