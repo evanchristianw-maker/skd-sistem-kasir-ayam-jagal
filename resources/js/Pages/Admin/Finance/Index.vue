@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { ref, computed } from "vue";
 import { router, usePage } from "@inertiajs/vue3";
 
@@ -94,12 +94,21 @@ const {
     resetFilter,
 } = useFinanceReport(props);
 
+// TRANSAKSI & RINCIAN PEMASUKAN
+const incomeTransactions = computed(() => {
+    return (props.transactions || []).filter((item) => item.type === "income");
+});
+
+const incomeBreakdown = computed(() => {
+    return (props.breakdown || []).filter((item) => item.type === "income");
+});
+
 // DATA AVAILABILITY
 const hasFinanceData = computed(() => {
     return (
-        props.hasData ||
-        props.transactions.length > 0 ||
-        props.breakdown.length > 0
+        summary.value.total_income > 0 ||
+        incomeTransactions.value.length > 0 ||
+        incomeBreakdown.value.length > 0
     );
 });
 
@@ -172,7 +181,7 @@ const handleResetFilter = () => {
                 <section class="finance-page-heading">
                     <h1 id="finance-page-title">Laporan Keuangan</h1>
                     <p>
-                        Pantau pemasukan, pengeluaran, dan keuntungan
+                        Pantau pemasukan dari transaksi penjualan
                         UMKM Ayam Jagal secara terstruktur.
                     </p>
                 </section>
@@ -220,23 +229,23 @@ const handleResetFilter = () => {
                     </div>
 
                     <div>
-                        <h3>Data Keuangan Belum Tersedia</h3>
+                        <h3>Data Pemasukan Belum Tersedia</h3>
                         <p>
-                            Ringkasan laporan keuangan akan ditampilkan
-                            setelah data dari sistem tersedia.
+                            Ringkasan laporan pemasukan akan ditampilkan
+                            setelah transaksi penjualan tersedia.
                         </p>
                     </div>
                 </section>
 
                 <!-- BREAKDOWN -->
                 <FinanceBreakdown
-                    :breakdown="breakdown"
+                    :breakdown="incomeBreakdown"
                     :format-rupiah="formatRupiah"
                 />
 
                 <!-- TRANSACTIONS -->
                 <FinanceTransactions
-                    :transactions="transactions"
+                    :transactions="incomeTransactions"
                     :format-rupiah="formatRupiah"
                 />
 

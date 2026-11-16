@@ -134,9 +134,19 @@ class TransaksiPembayaranTest extends TestCase
         $kasir = $this->buatKasir();
         $menu = $this->buatMenu();
 
+        $rekening = \App\Models\RekeningBank::create([
+            'nama_bank' => 'BCA',
+            'nomor_rekening' => '1234567890',
+            'atas_nama' => 'PT Ayam Jagal',
+            'status_aktif' => true,
+        ]);
+
+        $payload = $this->payloadTransaksi($menu, 'transfer', null);
+        $payload['rekening_bank_id'] = $rekening->id;
+
         $response = $this->actingAs($kasir)->postJson(
             '/transaksi',
-            $this->payloadTransaksi($menu, 'transfer', null)
+            $payload
         );
 
         $response->assertCreated();
@@ -146,7 +156,8 @@ class TransaksiPembayaranTest extends TestCase
             'metode_pembayaran' => 'transfer',
             'uang_dibayarkan' => 15000,
             'kembalian' => 0,
-            'status' => 'selesai',
+            'status' => 'menunggu_konfirmasi',
+            'status_pembayaran' => 'menunggu_konfirmasi',
         ]);
     }
 

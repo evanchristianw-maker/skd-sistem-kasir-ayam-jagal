@@ -9,14 +9,23 @@ defineProps({
         required: true,
     },
 });
+
+const formatMethodName = (category) => {
+    if (!category) return "Penjualan";
+    const lower = String(category).toLowerCase();
+    if (lower === "qris") return "QRIS";
+    if (lower === "tunai") return "Tunai";
+    if (lower === "transfer") return "Transfer";
+    return category;
+};
 </script>
 
 <template>
     <section class="finance-transactions" aria-labelledby="finance-transactions-title">
         <div class="finance-section-heading">
             <div>
-                <h2 id="finance-transactions-title">Riwayat Transaksi Keuangan</h2>
-                <p>Daftar aktivitas keuangan berdasarkan periode yang dipilih.</p>
+                <h2 id="finance-transactions-title">Riwayat Transaksi Pemasukan</h2>
+                <p>Daftar transaksi penjualan berdasarkan periode yang dipilih.</p>
             </div>
 
             <span class="finance-transaction-count" aria-live="polite" aria-atomic="true">
@@ -25,7 +34,7 @@ defineProps({
         </div>
 
         <div v-if="transactions.length" class="finance-table-wrapper">
-            <table class="finance-table" aria-label="Daftar riwayat transaksi keuangan">
+            <table class="finance-table" aria-label="Daftar riwayat transaksi pemasukan">
                 <thead>
                     <tr>
                         <th scope="col">Tanggal</th>
@@ -38,10 +47,10 @@ defineProps({
                 <tbody>
                     <tr v-for="transaction in transactions" :key="transaction.id">
                         <td>{{ transaction.date || '-' }}</td>
-                        <td>{{ transaction.category || '-' }}</td>
+                        <td>{{ formatMethodName(transaction.category) }}</td>
                         <td>
-                            <span class="finance-type-badge" :class="transaction.type">
-                                {{ transaction.type === 'income' ? 'Pemasukan' : 'Pengeluaran' }}
+                            <span class="finance-type-badge income">
+                                Pemasukan
                             </span>
                         </td>
                         <td class="finance-transaction-amount">
@@ -62,8 +71,8 @@ defineProps({
                         stroke-linecap="round"/>
                 </svg>
             </div>
-            <h3>Belum Ada Transaksi Keuangan</h3>
-            <p>Aktivitas keuangan akan ditampilkan setelah data tersedia.</p>
+            <h3>Belum Ada Transaksi Pemasukan</h3>
+            <p>Aktivitas transaksi penjualan akan ditampilkan setelah data tersedia.</p>
         </div>
     </section>
 </template>

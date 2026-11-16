@@ -35,7 +35,8 @@ class LaporanPenjualanController extends Controller
         }
 
         // Mengambil transaksi beserta relasinya
-        $query = Transaksi::with(['user', 'detailTransaksis']);
+        $query = Transaksi::with(['user', 'detailTransaksis'])
+            ->where('status', 'selesai');
 
         if ($tanggalMulai) {
             $query->whereDate('created_at', '>=', $tanggalMulai);

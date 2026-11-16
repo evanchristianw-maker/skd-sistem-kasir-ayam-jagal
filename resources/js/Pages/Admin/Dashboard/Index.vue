@@ -343,10 +343,25 @@ const transactionStatus = (status) => {
         };
     }
 
-    if (["pending", "menunggu", "process", "processing"].includes(normalized)) {
+    if (
+        [
+            "pending",
+            "menunggu",
+            "menunggu_konfirmasi",
+            "process",
+            "processing",
+        ].includes(normalized)
+    ) {
         return {
-            label: "Diproses",
+            label: "Menunggu Konfirmasi",
             class: "status-pending",
+        };
+    }
+
+    if (["dibatalkan", "cancelled", "canceled"].includes(normalized)) {
+        return {
+            label: "Dibatalkan",
+            class: "status-cancelled",
         };
     }
 

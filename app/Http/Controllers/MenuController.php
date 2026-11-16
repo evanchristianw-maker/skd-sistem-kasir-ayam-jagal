@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
+use App\Models\RekeningBank;
 use Inertia\Inertia;
 use Inertia\Response;
 use Illuminate\Http\Request;
@@ -157,8 +158,21 @@ class MenuController extends Controller
                 ];
             });
 
+        $rekeningBanks = RekeningBank::where('status_aktif', true)
+            ->latest()
+            ->get()
+            ->map(function ($rekening) {
+                return [
+                    'id' => $rekening->id,
+                    'nama_bank' => $rekening->nama_bank,
+                    'nomor_rekening' => $rekening->nomor_rekening,
+                    'atas_nama' => $rekening->atas_nama,
+                ];
+            });
+
         return Inertia::render('Cashier/Transactions/Index', [
             'menus' => $menus,
+            'rekeningBanks' => $rekeningBanks,
         ]);
     }
 }

@@ -15,6 +15,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    rekeningBanks: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const page = usePage();
@@ -45,6 +49,7 @@ const {
     cart,
     paymentMethod,
     cashReceived,
+    selectedRekeningBankId,
     processing,
     errors,
     errorMessage,
@@ -56,11 +61,13 @@ const {
     decreaseQuantity,
     removeFromCart,
     submitTransaction,
+    confirmTransaction,
+    cancelTransaction,
     clearCart,
     clearTransactionResult,
     formatRupiah,
     restoreTransactionResult,
-} = useCashierTransaction(props.menus);
+} = useCashierTransaction(props.menus, props.rekeningBanks);
 
 restoreTransactionResult();
 
@@ -85,6 +92,22 @@ const finishTransaction = async () => {
 
     if (result) {
         showPayment.value = false;
+    }
+};
+
+const confirmPendingTransaction = async () => {
+    const result = await confirmTransaction();
+
+    if (result) {
+        transactionResult.value = result;
+    }
+};
+
+const cancelPendingTransaction = async () => {
+    const result = await cancelTransaction();
+
+    if (result) {
+        transactionResult.value = result;
     }
 };
 
@@ -119,6 +142,22 @@ const transactionDetails = computed(() => {
         result.details ||
         []
     );
+});
+
+const transactionStatus = computed(() => {
+    return transactionResult.value?.status || "";
+});
+
+const isPendingTransfer = computed(() => {
+    return transactionStatus.value === "menunggu_konfirmasi";
+});
+
+const isCancelledTransaction = computed(() => {
+    return transactionStatus.value === "dibatalkan";
+});
+
+const canPrintReceipt = computed(() => {
+    return transactionResult.value?.status === "selesai";
 });
 
 const paymentMethodLabel = computed(() => {
@@ -156,6 +195,8 @@ const transactionDateTime = computed(() => {
 
 const printReceipt = () => {
     if (!transactionResult.value) return;
+
+    if (transactionResult.value.status !== "selesai") return;
 
     window.print();
 };
@@ -204,14 +245,16 @@ const printReceipt = () => {
                 </div>
 
                 <div v-else class="payment-workspace">
-                    <CashierPayment
-                        :total="total"
-                        :processing="processing"
-                        v-model:payment-method="paymentMethod"
-                        v-model:cash-received="cashReceived"
-                        @back="backToCart"
-                        @submit="finishTransaction"
-                    />
+                <CashierPayment
+                    :total="total"
+                    :processing="processing"
+                    :rekening-banks="props.rekeningBanks"
+                    v-model:payment-method="paymentMethod"
+                    v-model:cash-received="cashReceived"
+                    v-model:selected-rekening-bank-id="selectedRekeningBankId"
+                    @back="backToCart"
+                    @submit="finishTransaction"
+                />
 
                     <div
                         v-if="errorMessage"
@@ -234,8 +277,55 @@ const printReceipt = () => {
             </template>
 
             <section v-else class="transaction-result">
-                <div class="result-success-icon">
-                    <svg viewBox="0 0 24 24" fill="none">
+                <div
+                    class="result-status-icon"
+                    :class="{
+                        'status-success': !isPendingTransfer && !isCancelledTransaction,
+                        'status-pending': isPendingTransfer,
+                        'status-cancelled': isCancelledTransaction,
+                    }"
+                >
+                    <svg
+                        v-if="isPendingTransfer"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                    >
+                        <circle
+                            cx="12"
+                            cy="12"
+                            r="9"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        />
+                        <path
+                            d="M12 7V12L15 15"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                        />
+                    </svg>
+
+                    <svg
+                        v-else-if="isCancelledTransaction"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                    >
+                        <circle
+                            cx="12"
+                            cy="12"
+                            r="9"
+                            stroke="currentColor"
+                            stroke-width="2"
+                        />
+                        <path
+                            d="M9 9L15 15M15 9L9 15"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                        />
+                    </svg>
+
+                    <svg v-else viewBox="0 0 24 24" fill="none">
                         <path
                             d="M5 12L10 17L20 7"
                             stroke="currentColor"
@@ -246,10 +336,32 @@ const printReceipt = () => {
                     </svg>
                 </div>
 
-                <span class="result-eyebrow">TRANSAKSI SELESAI</span>
-                <h1>Pembayaran Berhasil!</h1>
+                <span class="result-eyebrow">
+                    {{
+                        isPendingTransfer
+                            ? "MENUNGGU KONFIRMASI"
+                            : isCancelledTransaction
+                              ? "TRANSAKSI DIBATALKAN"
+                              : "TRANSAKSI SELESAI"
+                    }}
+                </span>
+                <h1>
+                    {{
+                        isPendingTransfer
+                            ? "Menunggu Konfirmasi Pembayaran"
+                            : isCancelledTransaction
+                              ? "Transaksi Dibatalkan"
+                              : "Pembayaran Berhasil!"
+                    }}
+                </h1>
                 <p class="result-description">
-                    Transaksi pelanggan berhasil diproses.
+                    {{
+                        isPendingTransfer
+                            ? "Transaksi transfer telah dibuat. Konfirmasi setelah uang benar-benar diterima."
+                            : isCancelledTransaction
+                              ? "Transaksi transfer telah dibatalkan."
+                              : "Transaksi pelanggan berhasil diproses."
+                    }}
                 </p>
 
                 <div
@@ -348,6 +460,43 @@ const printReceipt = () => {
                             <strong>{{ paymentMethodLabel }}</strong>
                         </div>
 
+                        <template
+                            v-if="
+                                (transactionResult.metode_pembayaran ||
+                                    paymentMethod) === 'transfer'
+                            "
+                        >
+                            <div class="receipt-payment-row">
+                                <span>Bank Tujuan</span>
+                                <strong>
+                                    {{
+                                        transactionResult.nama_bank ||
+                                        "-"
+                                    }}
+                                </strong>
+                            </div>
+
+                            <div class="receipt-payment-row">
+                                <span>No. Rekening</span>
+                                <strong>
+                                    {{
+                                        transactionResult.nomor_rekening ||
+                                        "-"
+                                    }}
+                                </strong>
+                            </div>
+
+                            <div class="receipt-payment-row">
+                                <span>Atas Nama</span>
+                                <strong>
+                                    {{
+                                        transactionResult.atas_nama ||
+                                        "-"
+                                    }}
+                                </strong>
+                            </div>
+                        </template>
+
                         <div class="receipt-payment-row receipt-grand-total">
                             <span>TOTAL</span>
                             <strong>
@@ -408,6 +557,7 @@ const printReceipt = () => {
                     </select>
 
                     <button
+                        v-if="canPrintReceipt"
                         type="button"
                         class="print-receipt-button"
                         @click="printReceipt"
@@ -422,6 +572,27 @@ const printReceipt = () => {
                             />
                         </svg>
                         Cetak Struk
+                    </button>
+
+                    <button
+                        v-if="isPendingTransfer"
+                        type="button"
+                        class="confirm-payment-button"
+                        :disabled="processing"
+                        @click="confirmPendingTransaction"
+                    >
+                        <span v-if="processing">Memproses...</span>
+                        <span v-else>Konfirmasi Pembayaran Diterima</span>
+                    </button>
+
+                    <button
+                        v-if="isPendingTransfer"
+                        type="button"
+                        class="cancel-transaction-button"
+                        :disabled="processing"
+                        @click="cancelPendingTransaction"
+                    >
+                        Batalkan Transaksi
                     </button>
 
                     <button
@@ -565,6 +736,36 @@ const printReceipt = () => {
     align-items: center;
     text-align: center;
     animation: fadeUp 0.4s ease both;
+}
+
+.result-status-icon {
+    width: 72px;
+    height: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    border-radius: 50%;
+}
+
+.result-status-icon svg {
+    width: 36px;
+    height: 36px;
+}
+
+.result-status-icon.status-success {
+    color: #16834b;
+    background: #e7f7ed;
+}
+
+.result-status-icon.status-pending {
+    color: #b45309;
+    background: #fef3c7;
+}
+
+.result-status-icon.status-cancelled {
+    color: #b91c1c;
+    background: #fee2e2;
 }
 
 .result-success-icon {
@@ -884,6 +1085,45 @@ const printReceipt = () => {
 .new-transaction-button:focus-visible {
     outline: 3px solid rgba(202, 7, 8, 0.25);
     outline-offset: 3px;
+}
+
+.confirm-payment-button,
+.cancel-transaction-button {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.confirm-payment-button {
+    color: #ffffff;
+    background: #ca0708;
+}
+
+.confirm-payment-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background: #a80000;
+}
+
+.cancel-transaction-button {
+    color: #b91c1c;
+    background: #fee2e2;
+}
+
+.cancel-transaction-button:hover:not(:disabled) {
+    background: #fecaca;
+}
+
+.confirm-payment-button:disabled,
+.cancel-transaction-button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
 }
 
 @keyframes fadeUp {

@@ -18,13 +18,44 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    rekeningBanks: {
+        type: Array,
+        default: () => [],
+    },
+    selectedRekeningBankId: {
+        type: [Number, String, null],
+        default: null,
+    },
 });
 
 const qrisConfirmed = ref(false);
 
+const selectedRekening = computed(() => {
+    return (
+        props.rekeningBanks.find(
+            (rekening) =>
+                Number(rekening.id) ===
+                Number(props.selectedRekeningBankId),
+        ) || null
+    );
+});
+
+const copyRekeningNumber = async () => {
+    if (!selectedRekening.value?.nomor_rekening) return;
+
+    try {
+        await navigator.clipboard.writeText(
+            selectedRekening.value.nomor_rekening,
+        );
+    } catch {
+        window.alert(selectedRekening.value.nomor_rekening);
+    }
+};
+
 const emit = defineEmits([
     "update:paymentMethod",
     "update:cashReceived",
+    "update:selectedRekeningBankId",
     "submit",
     "back",
 ]);
@@ -84,7 +115,7 @@ const canSubmit = computed(() => {
 
     if (props.paymentMethod === "qris") return qrisConfirmed.value;
 
-    return props.paymentMethod === "transfer";
+    return Boolean(props.selectedRekeningBankId);
 });
 
 const selectPayment = (method) => {
@@ -317,25 +348,73 @@ const selectPayment = (method) => {
             </p>
         </div>
 
-        <div v-else class="non-cash-info">
-            <div class="non-cash-icon">
-                <svg viewBox="0 0 24 24" fill="none">
-                    <path
-                        d="M12 3V21M3 12H21"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        stroke-linecap="round"
-                    />
-                </svg>
-            </div>
-
-            <div>
+        <div v-else class="transfer-payment-section">
+            <div class="transfer-heading">
                 <strong>Transfer Bank</strong>
                 <p>
-                    Pastikan pembayaran pelanggan telah diterima sebelum
-                    menyelesaikan transaksi.
+                    Pilih rekening tujuan dan pastikan pembayaran benar-benar
+                    diterima sebelum transaksi diselesaikan.
                 </p>
             </div>
+
+            <label for="rekening-bank">Rekening Tujuan</label>
+
+            <select
+                id="rekening-bank"
+                :value="selectedRekeningBankId"
+                @change="
+                    emit(
+                        'update:selectedRekeningBankId',
+                        $event.target.value
+                            ? Number($event.target.value)
+                            : null,
+                    )
+                "
+            >
+                <option value="">Pilih rekening bank</option>
+                <option
+                    v-for="rekening in rekeningBanks"
+                    :key="rekening.id"
+                    :value="rekening.id"
+                >
+                    {{ rekening.nama_bank }} -
+                    {{ rekening.nomor_rekening }} ({{ rekening.atas_nama }})
+                </option>
+            </select>
+
+            <div v-if="selectedRekening" class="selected-rekening-card">
+                <div>
+                    <span>Nama Bank</span>
+                    <strong>{{ selectedRekening.nama_bank }}</strong>
+                </div>
+
+                <div>
+                    <span>Nomor Rekening</span>
+                    <strong>{{ selectedRekening.nomor_rekening }}</strong>
+                    <button
+                        type="button"
+                        class="copy-button"
+                        @click="copyRekeningNumber"
+                    >
+                        Salin
+                    </button>
+                </div>
+
+                <div>
+                    <span>Atas Nama</span>
+                    <strong>{{ selectedRekening.atas_nama }}</strong>
+                </div>
+            </div>
+
+            <div class="transfer-amount">
+                <span>Nominal yang harus ditransfer</span>
+                <strong>{{ formatCurrency(total) }}</strong>
+            </div>
+
+            <p class="transfer-note">
+                Transaksi akan berstatus menunggu konfirmasi sampai kasir
+                memastikan uang benar-benar diterima.
+            </p>
         </div>
 
         <div class="payment-actions">
@@ -684,6 +763,122 @@ const selectPayment = (method) => {
 
 .non-cash-info p {
     margin: 5px 0 0;
+    color: #777777;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.transfer-payment-section {
+    margin-top: 24px;
+    animation: paymentFadeUp 0.25s ease both;
+}
+
+.transfer-heading {
+    margin-bottom: 16px;
+}
+
+.transfer-heading strong {
+    color: #333333;
+    font-size: 14px;
+}
+
+.transfer-heading p {
+    margin: 6px 0 0;
+    color: #777777;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.transfer-payment-section label {
+    display: block;
+    margin-bottom: 9px;
+    color: #333333;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.transfer-payment-section select {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 13px;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #252525;
+    font-family: inherit;
+    font-size: 13px;
+}
+
+.selected-rekening-card {
+    margin-top: 16px;
+    padding: 16px;
+    border: 1px solid #ffe0e0;
+    border-radius: 12px;
+    background: #fff7f7;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.selected-rekening-card > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.selected-rekening-card span {
+    color: #777777;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.selected-rekening-card strong {
+    color: #252525;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.copy-button {
+    min-height: 30px;
+    padding: 0 10px;
+    border: 1px solid #ca0708;
+    border-radius: 8px;
+    color: #ca0708;
+    background: #ffffff;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.transfer-amount {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 15px;
+    border: 1px solid #e9eaed;
+    border-radius: 10px;
+    background: #f8f9fa;
+}
+
+.transfer-amount span {
+    color: #666666;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.transfer-amount strong {
+    color: #ca0708;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.transfer-note {
+    margin: 12px 0 0;
     color: #777777;
     font-size: 12px;
     line-height: 1.6;

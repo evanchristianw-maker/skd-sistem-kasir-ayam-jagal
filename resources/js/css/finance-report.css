@@ -1,4 +1,4 @@
-﻿.finance-page {
+.finance-page {
     min-height: 100vh;
     background: #f5f6f8;
     font-family: Inter, "Segoe UI", Arial, sans-serif;
@@ -154,6 +154,16 @@
     gap: 18px;
     margin-bottom: 24px;
     animation: financeFadeUp 0.5s ease 0.16s both;
+}
+
+.finance-summary.finance-summary-income-only {
+    grid-template-columns: minmax(0, 420px);
+}
+
+@media (max-width: 600px) {
+    .finance-summary.finance-summary-income-only {
+        grid-template-columns: 1fr;
+    }
 }
 
 .finance-summary-card {
