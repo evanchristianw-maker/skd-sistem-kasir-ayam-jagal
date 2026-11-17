@@ -1,4 +1,4 @@
-﻿.sales-report-page {
+.sales-report-page {
     --primary: #ca0708;
     --primary-dark: #a80000;
     --text-primary: #202124;
@@ -824,4 +824,132 @@
     display: block;
     width: 100%;
     text-align: center;
+}
+
+/* RESPONSIVE TRANSACTION HISTORY FIX */
+
+.sales-report-page .sales-content-card {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.sales-report-page .sales-table-wrapper {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.sales-report-page .sales-table {
+    width: 100%;
+    min-width: 850px;
+    table-layout: auto;
+}
+
+.sales-report-page .transaction-cashier {
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.sales-report-page .transaction-id {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+    .sales-report-page .sales-content-card {
+        padding: 18px 13px;
+        overflow: hidden;
+    }
+
+    .sales-report-page .sales-section-heading {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .sales-report-page .sales-section-heading h2 {
+        font-size: 15px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .sales-report-page .sales-section-heading p {
+        line-height: 1.6;
+    }
+
+    .sales-report-page .sales-table-wrapper {
+        overflow-x: hidden;
+        border-radius: 9px;
+    }
+
+    .sales-report-page .sales-table {
+        width: 100%;
+        min-width: 0;
+        table-layout: fixed;
+        white-space: normal;
+    }
+
+    .sales-report-page .sales-table th,
+    .sales-report-page .sales-table td {
+        padding: 12px 8px;
+        font-size: 10px;
+        overflow-wrap: anywhere;
+    }
+
+    /* Sembunyikan kolom yang kurang penting pada HP */
+    .sales-report-page .sales-table th:nth-child(n+4),
+    .sales-report-page .sales-table td:nth-child(n+4) {
+        display: none;
+    }
+
+    /* Atur proporsi tiga kolom utama */
+    .sales-report-page .sales-table th:nth-child(1),
+    .sales-report-page .sales-table td:nth-child(1) {
+        width: 42%;
+    }
+
+    .sales-report-page .sales-table th:nth-child(2),
+    .sales-report-page .sales-table td:nth-child(2) {
+        width: 34%;
+    }
+
+    .sales-report-page .sales-table th:nth-child(3),
+    .sales-report-page .sales-table td:nth-child(3) {
+        width: 24%;
+    }
+
+    .sales-report-page .transaction-id {
+        font-size: 10px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .sales-report-page .transaction-date {
+        font-size: 10px;
+        line-height: 1.4;
+    }
+
+    .sales-report-page .transaction-date small {
+        font-size: 9px;
+    }
+
+    .sales-report-page .transaction-cashier {
+        white-space: normal;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 380px) {
+    .sales-report-page .sales-content-card {
+        padding-right: 10px;
+        padding-left: 10px;
+    }
+
+    .sales-report-page .sales-table th,
+    .sales-report-page .sales-table td {
+        padding: 10px 6px;
+        font-size: 9px;
+    }
 }

@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { ref, computed, watch } from "vue";
 import { router, usePage } from "@inertiajs/vue3";
 
@@ -231,7 +231,7 @@ const handleResetFilter = () => {
                                         </div>
                                     </td>
 
-                                    <td>{{ transaction.cashier }}</td>
+                                    <td class="transaction-cashier">Kasir</td>
 
                                     <td>{{ transaction.items }} Item</td>
 
