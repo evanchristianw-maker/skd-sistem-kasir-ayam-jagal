@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 defineProps({
     breakdown: {
         type: Array,
@@ -9,14 +9,23 @@ defineProps({
         required: true,
     },
 });
+
+const formatMethodName = (category) => {
+    if (!category) return "Penjualan";
+    const lower = String(category).toLowerCase();
+    if (lower === "qris") return "QRIS";
+    if (lower === "tunai") return "Tunai";
+    if (lower === "transfer") return "Transfer";
+    return category;
+};
 </script>
 
 <template>
     <section class="finance-breakdown" aria-labelledby="finance-breakdown-title">
         <div class="finance-section-heading">
             <div>
-                <h2 id="finance-breakdown-title">Rincian Keuangan</h2>
-                <p>Ringkasan pemasukan dan pengeluaran berdasarkan kategori.</p>
+                <h2 id="finance-breakdown-title">Rincian Pemasukan</h2>
+                <p>Ringkasan pemasukan berdasarkan metode pembayaran.</p>
             </div>
         </div>
 
@@ -27,14 +36,14 @@ defineProps({
                 class="finance-breakdown-item"
             >
                 <div class="finance-breakdown-info">
-                    <span class="finance-breakdown-dot" :class="item.type" aria-hidden="true"></span>
+                    <span class="finance-breakdown-dot income" aria-hidden="true"></span>
                     <div>
-                        <strong>{{ item.category }}</strong>
-                        <small>{{ item.type === 'income' ? 'Pemasukan' : 'Pengeluaran' }}</small>
+                        <strong>{{ formatMethodName(item.category) }}</strong>
+                        <small>Pemasukan</small>
                     </div>
                 </div>
 
-                <strong :class="item.type">
+                <strong class="income">
                     {{ formatRupiah(item.amount) }}
                 </strong>
             </article>
@@ -50,8 +59,8 @@ defineProps({
                         stroke-linecap="round"/>
                 </svg>
             </div>
-            <h3>Belum Ada Rincian Keuangan</h3>
-            <p>Rincian keuangan akan ditampilkan setelah data tersedia.</p>
+            <h3>Belum Ada Rincian Pemasukan</h3>
+            <p>Rincian pemasukan akan ditampilkan setelah transaksi tersedia.</p>
         </div>
     </section>
 </template>

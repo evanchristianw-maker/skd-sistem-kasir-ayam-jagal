@@ -13,6 +13,8 @@ const isMenuActive = computed(() => currentPath.value === "/menu");
 const isSalesActive = computed(() => currentPath.value === "/sales");
 
 const isFinanceActive = computed(() => currentPath.value === "/finance");
+
+const isRekeningActive = computed(() => currentPath.value === "/rekening-bank");
 </script>
 
 <template>

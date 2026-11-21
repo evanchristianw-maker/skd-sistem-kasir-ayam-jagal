@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { Link, usePage } from "@inertiajs/vue3";
 import { computed } from "vue";
 
@@ -24,6 +24,11 @@ const navigationItems = [
         label: "Keuangan",
         href: "/finance",
         icon: "finance",
+    },
+    {
+        label: "Rekening",
+        href: "/rekening-bank",
+        icon: "rekening",
     },
 ];
 
@@ -127,6 +132,20 @@ const isActive = (href) => currentPath.value === href;
                 />
             </svg>
 
+            <svg
+                v-else-if="item.icon === 'rekening'"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden="true"
+            >
+                <path
+                    d="M3 21H21M4 18H20M6 18V13M10 18V13M14 18V13M18 18V13M3 10L12 4L21 10H3Z"
+                    stroke="currentColor"
+                    stroke-width="1.7"
+                    stroke-linejoin="round"
+                />
+            </svg>
+
             <span>{{ item.label }}</span>
         </Link>
     </nav>
@@ -141,7 +160,7 @@ const isActive = (href) => currentPath.value === href;
     width: 100%;
     min-height: 84px;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     align-items: center;
     padding: 8px max(calc((100vw - 650px) / 2), 12px);
     border-top: 1px solid #eeeeee;

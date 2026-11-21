@@ -52,10 +52,18 @@ class User extends Authenticatable
     }
 
     /**
-    * Relasi user dengan transaksi yang dilayani.
-    */
+     * Relasi user dengan transaksi yang dilayani.
+     */
     public function transaksis(): HasMany
     {
         return $this->hasMany(Transaksi::class);
+    }
+
+    /**
+     * Relasi user/kasir dengan transaksi yang dikonfirmasi pembayarannya.
+     */
+    public function transaksiDikonfirmasi(): HasMany
+    {
+        return $this->hasMany(Transaksi::class, 'dikonfirmasi_oleh');
     }
 }

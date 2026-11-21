@@ -1,12 +1,17 @@
 ﻿import { ref, computed } from "vue";
 import axios from "axios";
 
-export default function useCashierTransaction(initialMenus = []) {
+export default function useCashierTransaction(
+    initialMenus = [],
+    initialRekeningBanks = [],
+) {
     const menus = ref(initialMenus);
     const cart = ref([]);
 
     const paymentMethod = ref("tunai");
     const cashReceived = ref("");
+    const selectedRekeningBankId = ref(null);
+    const rekeningBanks = ref(initialRekeningBanks);
 
     const processing = ref(false);
     const errors = ref({});
@@ -132,6 +137,10 @@ export default function useCashierTransaction(initialMenus = []) {
         if (method !== "tunai") {
             cashReceived.value = "";
         }
+
+        if (method !== "transfer") {
+            selectedRekeningBankId.value = null;
+        }
     };
 
     const resetErrors = () => {
@@ -164,6 +173,16 @@ export default function useCashierTransaction(initialMenus = []) {
             }
         }
 
+        if (paymentMethod.value === "transfer" && !selectedRekeningBankId.value) {
+            errors.value = {
+                rekening_bank_id: [
+                    "Pilih rekening bank tujuan transfer.",
+                ],
+            };
+
+            return null;
+        }
+
         processing.value = true;
 
         const payload = {
@@ -175,6 +194,10 @@ export default function useCashierTransaction(initialMenus = []) {
             uang_dibayarkan:
                 paymentMethod.value === "tunai"
                     ? Number(cashReceived.value)
+                    : null,
+            rekening_bank_id:
+                paymentMethod.value === "transfer"
+                    ? selectedRekeningBankId.value
                     : null,
         };
 
@@ -227,6 +250,134 @@ export default function useCashierTransaction(initialMenus = []) {
         }
     };
 
+    const confirmTransaction = async () => {
+        if (processing.value) return null;
+
+        const id = transactionResult.value?.id;
+
+        if (!id) {
+            errorMessage.value = "Transaksi tidak ditemukan.";
+            return null;
+        }
+
+        processing.value = true;
+        resetErrors();
+
+        try {
+            const response = await axios.post(
+                route("transaksi.konfirmasi", id),
+                {},
+                {
+                    headers: {
+                        Accept: "application/json",
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
+
+            const result = response.data?.data;
+
+            if (!result) {
+                throw new Error("Respons konfirmasi tidak memiliki data.");
+            }
+
+            transactionResult.value = result;
+
+            sessionStorage.setItem(
+                "cashier_last_transaction",
+                JSON.stringify(result),
+            );
+
+            return result;
+        } catch (error) {
+            const response = error.response;
+
+            if (response?.status === 422) {
+                errors.value = response.data?.errors || {};
+                errorMessage.value =
+                    response.data?.message ||
+                    "Transaksi tidak dapat dikonfirmasi.";
+            } else if (response?.status === 403) {
+                errorMessage.value =
+                    response?.data?.message ||
+                    "Anda tidak memiliki akses ke transaksi ini.";
+            } else {
+                errorMessage.value =
+                    response?.data?.message ||
+                    error.message ||
+                    "Terjadi kesalahan saat mengonfirmasi transaksi.";
+            }
+
+            return null;
+        } finally {
+            processing.value = false;
+        }
+    };
+
+    const cancelTransaction = async () => {
+        if (processing.value) return null;
+
+        const id = transactionResult.value?.id;
+
+        if (!id) {
+            errorMessage.value = "Transaksi tidak ditemukan.";
+            return null;
+        }
+
+        processing.value = true;
+        resetErrors();
+
+        try {
+            const response = await axios.post(
+                route("transaksi.batalkan", id),
+                {},
+                {
+                    headers: {
+                        Accept: "application/json",
+                        "Content-Type": "application/json",
+                    },
+                },
+            );
+
+            const result = response.data?.data;
+
+            if (!result) {
+                throw new Error("Respons pembatalan tidak memiliki data.");
+            }
+
+            transactionResult.value = result;
+
+            sessionStorage.setItem(
+                "cashier_last_transaction",
+                JSON.stringify(result),
+            );
+
+            return result;
+        } catch (error) {
+            const response = error.response;
+
+            if (response?.status === 422) {
+                errors.value = response.data?.errors || {};
+                errorMessage.value =
+                    response.data?.message ||
+                    "Transaksi tidak dapat dibatalkan.";
+            } else if (response?.status === 403) {
+                errorMessage.value =
+                    response?.data?.message ||
+                    "Anda tidak memiliki akses ke transaksi ini.";
+            } else {
+                errorMessage.value =
+                    response?.data?.message ||
+                    error.message ||
+                    "Terjadi kesalahan saat membatalkan transaksi.";
+            }
+
+            return null;
+        } finally {
+            processing.value = false;
+        }
+    };
+
     const restoreTransactionResult = () => {
         try {
             const storedResult = sessionStorage.getItem(
@@ -256,6 +407,8 @@ export default function useCashierTransaction(initialMenus = []) {
         cart,
         paymentMethod,
         cashReceived,
+        selectedRekeningBankId,
+        rekeningBanks,
         processing,
         errors,
         errorMessage,
@@ -271,8 +424,9 @@ export default function useCashierTransaction(initialMenus = []) {
         clearCart,
         selectPaymentMethod,
         submitTransaction,
+        confirmTransaction,
+        cancelTransaction,
         restoreTransactionResult,
         clearTransactionResult,
     };
 }
-

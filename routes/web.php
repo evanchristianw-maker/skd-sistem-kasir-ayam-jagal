@@ -6,6 +6,7 @@ use App\Http\Controllers\LaporanPenjualanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\FinanceController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\RekeningBankController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -67,6 +68,22 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     // Laporan Keuangan
     Route::get('/finance', [FinanceController::class, 'index'])
         ->name('finance.index');
+
+    // Manajemen Rekening Bank
+    Route::get('/rekening-bank', [RekeningBankController::class, 'index'])
+        ->name('rekening-bank.index');
+
+    Route::post('/rekening-bank', [RekeningBankController::class, 'store'])
+        ->name('rekening-bank.store');
+
+    Route::put('/rekening-bank/{rekeningBank}', [RekeningBankController::class, 'update'])
+        ->name('rekening-bank.update');
+
+    Route::delete('/rekening-bank/{rekeningBank}', [RekeningBankController::class, 'destroy'])
+        ->name('rekening-bank.destroy');
+
+    Route::patch('/rekening-bank/{rekeningBank}/status', [RekeningBankController::class, 'toggleStatus'])
+        ->name('rekening-bank.toggleStatus');
 });
 
 
@@ -83,6 +100,16 @@ Route::middleware(['auth', 'role:kasir'])->group(function () {
     // Menyimpan Transaksi
     Route::post('/transaksi', [TransaksiController::class, 'store'])
         ->name('transaksi.store');
+});
+
+Route::middleware(['auth', 'role:admin,kasir'])->group(function () {
+    // Konfirmasi pembayaran transfer
+    Route::post('/transaksi/{transaksi}/konfirmasi', [TransaksiController::class, 'konfirmasi'])
+        ->name('transaksi.konfirmasi');
+
+    // Pembatalan pembayaran transfer
+    Route::post('/transaksi/{transaksi}/batalkan', [TransaksiController::class, 'batalkan'])
+        ->name('transaksi.batalkan');
 });
 Route::middleware(['auth', 'role:admin,kasir'])
     ->prefix('notifications')
