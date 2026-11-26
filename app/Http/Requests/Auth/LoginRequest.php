@@ -48,7 +48,7 @@ class LoginRequest extends FormRequest
             $this->boolean('remember')
         )) {
             // Mencatat percobaan login yang gagal
-            RateLimiter::hit($this->throttleKey());
+            RateLimiter::hit($this->throttleKey(), 60);
 
             // Menampilkan pesan kesalahan
             throw ValidationException::withMessages([
