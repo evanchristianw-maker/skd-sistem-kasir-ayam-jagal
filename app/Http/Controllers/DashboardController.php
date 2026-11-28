@@ -11,6 +11,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
+        abort_unless(auth()->user()?->isAdmin(), 403, 'Hanya Admin yang dapat mengakses dashboard.');
         // Hanya transaksi yang berhasil diselesaikan.
         $transaksiSelesai = Transaksi::where('status', 'selesai');
 
