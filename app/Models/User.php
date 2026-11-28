@@ -29,6 +29,8 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
+    public const ROLE_ADMIN = 'admin';
+    public const ROLE_KASIR = 'kasir';
     // Mengaktifkan factory dan notifikasi Laravel
     use HasFactory, Notifiable;
 
@@ -54,6 +56,22 @@ class User extends Authenticatable
     /**
      * Relasi user dengan transaksi yang dilayani.
      */
+
+    /**
+     * Memeriksa apakah pengguna memiliki role Admin.
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    /**
+     * Memeriksa apakah pengguna memiliki role Kasir.
+     */
+    public function isKasir(): bool
+    {
+        return $this->role === self::ROLE_KASIR;
+    }
     public function transaksis(): HasMany
     {
         return $this->hasMany(Transaksi::class);
